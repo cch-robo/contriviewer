@@ -2,6 +2,7 @@ package com.example.kanetaka.problem.contriviewer.page.overview
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.kanetaka.problem.contriviewer.R
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewService
@@ -49,8 +50,7 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
      */
     override fun refreshContributors() {
         // IOスレッドでサーバからコントリビュータ情報を取得する
-        val scope = CoroutineScope(Job() + Dispatchers.IO)
-        scope.launch {
+        viewModelScope.launch {
             debugLog("refreshContributors  refresh start!!")
             val results = mutableListOf<OverviewContributor>()
 
