@@ -5,38 +5,35 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.example.kanetaka.problem.contriviewer.R
+import androidx.lifecycle.ViewModelProvider
 import com.example.kanetaka.problem.contriviewer.databinding.FragmentOverviewBinding
 
-/**
- * A simple [Fragment] subclass as the default destination in the navigation.
- */
 class OverviewFragment : Fragment() {
 
-    private var _binding: FragmentOverviewBinding? = null
+    private val viewModel: OverviewViewModel by lazy {
+        ViewModelProvider(this).get(OverviewViewModel::class.java)
+    }
 
-    private val binding get() = _binding!!
+    private lateinit var _viewBinding : OverviewViewBinding
+    private val viewBinding get() = _viewBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+        _viewBinding = OverviewViewBinding(FragmentOverviewBinding.inflate(inflater, container, false))
 
-        _binding = FragmentOverviewBinding.inflate(inflater, container, false)
-        return binding.root
+        return viewBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.buttonFirst.setOnClickListener {
-            findNavController().navigate(R.id.action_Overview_to_Detail)
-        }
+        viewModel.setup(this, viewBinding)
+        viewBinding.setup(this, viewModel)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
     }
 }
