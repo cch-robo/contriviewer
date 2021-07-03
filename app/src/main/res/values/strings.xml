@@ -11,5 +11,9 @@
     <string name="contributor_name_sample">sample</string>
     <string name="contributor_contribution_sample">100</string>
 
+    <!-- Contributors Overview messages -->
+    <string name="contributors_overview_refresh_error">Failed to get the contributors overview.</string>
+    <string name="contributors_overview_refresh_request">Swipe down to update the contributor overview.</string>
+
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 </resources>
