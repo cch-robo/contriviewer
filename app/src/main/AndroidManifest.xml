@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ContriViewer">
         <activity
-            android:name=".MainActivity"
+            android:name=".page.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.ContriViewer.NoActionBar">
             <intent-filter>
