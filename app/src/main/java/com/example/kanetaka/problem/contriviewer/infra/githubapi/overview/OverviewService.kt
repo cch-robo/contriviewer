@@ -5,9 +5,9 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
-import retrofit2.http.Query
 
-private const val BASE_URL = "https://api.github.com/repos/googlesamples/android-architecture-components/"
+private const val BASE_URL =
+    "https://api.github.com/repos/googlesamples/android-architecture-components/"
 
 interface OverviewServiceApi {
     @GET("contributors")
@@ -24,5 +24,5 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 object OverviewService {
-    val retrofitService : OverviewServiceApi by lazy { retrofit.create(OverviewServiceApi::class.java) }
+    val retrofitService: OverviewServiceApi by lazy { retrofit.create(OverviewServiceApi::class.java) }
 }

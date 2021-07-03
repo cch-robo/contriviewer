@@ -1,9 +1,13 @@
 package com.example.kanetaka.problem.contriviewer
 
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewService
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.Assert.*
 
 /**
  * OverviewService 動作確認（ネットワークが機能するときしかテストできません）
