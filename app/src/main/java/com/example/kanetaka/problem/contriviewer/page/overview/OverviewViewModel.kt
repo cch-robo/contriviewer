@@ -63,7 +63,8 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
                             prop.id,
                             prop.login,
                             prop.avatar_url,
-                            prop.contributions
+                            prop.contributions,
+                            prop.url
                         )
                     )
                 }
