@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contributor_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/contributor_icon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        tools:src="@tools:sample/backgrounds/scenic"
+        android:contentDescription="@string/contributor_icon_description" />
+
+    <LinearLayout
+        android:id="@+id/contributor_item_subarea"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/contributor_name"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="start|center_vertical"
+            android:padding="8dp"
+            android:textSize="10pt"
+            tools:text="@string/contributor_name_sample"/>
+
+        <TextView
+            android:id="@+id/contributor_contribution"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="end|center_vertical"
+            android:padding="8dp"
+            android:textSize="10pt"
+            tools:text="@string/contributor_contribution_sample"/>
+
+    </LinearLayout>
+
+</LinearLayout>
