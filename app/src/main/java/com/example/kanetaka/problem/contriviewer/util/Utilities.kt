@@ -40,9 +40,9 @@ object Utilities {
     /**
      * デバッグ出力用ログ
      */
-    fun debugLog(tag: String, message: String) {
+    fun debugLog(message: String) {
         if (BuildConfig.DEBUG) {
-            Log.d(tag, message)
+            Log.d("DEBUG", message)
         }
     }
 }
