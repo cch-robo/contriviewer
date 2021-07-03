@@ -19,5 +19,5 @@ data class OverviewModel(
     val received_events_url: String,
     val type: String,
     val site_admin: Boolean,
-    val contributions: Int
+    val contributions: Long
 )
