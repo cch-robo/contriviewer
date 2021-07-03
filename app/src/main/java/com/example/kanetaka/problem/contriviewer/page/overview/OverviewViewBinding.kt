@@ -51,7 +51,7 @@ class OverviewViewBinding(
                     DividerItemDecoration.VERTICAL
                 )
             )
-            adapter = OverviewContributorsAdapter().also {
+            adapter = OverviewContributorsAdapter(fragment).also {
                 contributorListAdapter = it
             }
         }
