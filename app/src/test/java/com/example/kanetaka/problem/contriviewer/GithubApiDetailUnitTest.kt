@@ -38,7 +38,7 @@ class GithubApiDetailUnitTest {
     @Test
     fun can_fetch_github_api_contributor() {
         assertNotNull(contributor)
-        assertEquals("dlam", contributor.login, )
+        assertEquals("dlam", contributor.login)
         assertEquals("@Google", contributor.company)
     }
 
