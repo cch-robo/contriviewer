@@ -1,6 +1,13 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+
+    // kotlinx.android.parcel.Parcelize @Parcelize を使えるようにする。
+    id 'kotlin-kapt'
+    id 'kotlin-android-extensions'
+
+    // Navigation 遷移でパラメータを使えるようにする。
+    id 'androidx.navigation.safeargs'
 }
 
 android {
