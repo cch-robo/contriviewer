@@ -11,7 +11,7 @@ private const val BASE_URL =
 
 interface OverviewServiceApi {
     @GET("contributors")
-    suspend fun getContributors(): List<ContributorsModel>
+    suspend fun getContributors(): List<OverviewModel>
 }
 
 private val moshi = Moshi.Builder()

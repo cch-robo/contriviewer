@@ -1,6 +1,6 @@
 package com.example.kanetaka.problem.contriviewer
 
-import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.ContributorsModel
+import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,7 @@ import org.junit.Test
  * OverviewService 動作確認（ネットワークが機能するときしかテストできません）
  */
 class GithubApiOverviewUnitTest {
-    private lateinit var contributors: List<ContributorsModel>
+    private lateinit var contributors: List<OverviewModel>
 
     @Before
     fun setUp() {
@@ -49,7 +49,7 @@ class GithubApiOverviewUnitTest {
      */
     @Test
     fun fetch_github_api_contributors_isComplete() {
-        assertEquals(contributors.size, 30)
+        assertEquals(30, contributors.size)
     }
 
     /**
