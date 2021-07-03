@@ -14,14 +14,15 @@ class OverviewFragment : Fragment() {
         ViewModelProvider(this).get(OverviewViewModel::class.java)
     }
 
-    private lateinit var _viewBinding : OverviewViewBinding
+    private lateinit var _viewBinding: OverviewViewBinding
     private val viewBinding get() = _viewBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _viewBinding = OverviewViewBinding(FragmentOverviewBinding.inflate(inflater, container, false))
+        _viewBinding =
+            OverviewViewBinding(FragmentOverviewBinding.inflate(inflater, container, false))
 
         return viewBinding.root
     }
@@ -33,7 +34,4 @@ class OverviewFragment : Fragment() {
         viewBinding.setup(this, viewModel)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-    }
 }

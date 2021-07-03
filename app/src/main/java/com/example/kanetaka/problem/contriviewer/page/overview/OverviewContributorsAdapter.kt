@@ -10,16 +10,17 @@ import com.example.kanetaka.problem.contriviewer.R
 import com.example.kanetaka.problem.contriviewer.databinding.OverviewItemBinding
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
-data class OverviewContributor (
+data class OverviewContributor(
     val id: Long,
     val name: String,
     val iconUrl: String,
     val contributions: Long
 )
 
-class OverviewContributorsAdapter : ListAdapter<OverviewContributor, RecyclerView.ViewHolder>(OverviewContributorDiffCallback()) {
+class OverviewContributorsAdapter :
+    ListAdapter<OverviewContributor, RecyclerView.ViewHolder>(OverviewContributorDiffCallback()) {
 
-    init{
+    init {
         debugLog("OverviewContributorsAdapter#init")
     }
 
@@ -34,7 +35,8 @@ class OverviewContributorsAdapter : ListAdapter<OverviewContributor, RecyclerVie
         (holder as ContributorViewHolder).bind(item)
     }
 
-    class ContributorViewHolder(private val binding: OverviewItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    class ContributorViewHolder(private val binding: OverviewItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(item: OverviewContributor) {
             debugLog("ContributorViewHolder#bind [${item.name}]")
             binding.contributorName.text = item.name
@@ -48,12 +50,18 @@ class OverviewContributorsAdapter : ListAdapter<OverviewContributor, RecyclerVie
     }
 
     class OverviewContributorDiffCallback : DiffUtil.ItemCallback<OverviewContributor>() {
-        override fun areItemsTheSame(oldItem: OverviewContributor, newItem: OverviewContributor): Boolean {
+        override fun areItemsTheSame(
+            oldItem: OverviewContributor,
+            newItem: OverviewContributor
+        ): Boolean {
             debugLog("OverviewContributorDiffCallback#areItemsTheSame")
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: OverviewContributor, newItem: OverviewContributor): Boolean {
+        override fun areContentsTheSame(
+            oldItem: OverviewContributor,
+            newItem: OverviewContributor
+        ): Boolean {
             debugLog("OverviewContributorDiffCallback#areContentsTheSame")
             return oldItem == newItem
         }

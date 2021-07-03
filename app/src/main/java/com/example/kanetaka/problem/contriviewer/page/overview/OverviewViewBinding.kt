@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.kanetaka.problem.contriviewer.R
 import com.example.kanetaka.problem.contriviewer.databinding.FragmentOverviewBinding
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
@@ -15,7 +14,7 @@ import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
  */
 interface OverviewViewBindingNotifier {
     // ページ更新開始通知
-    fun updatePage(contributors : List<OverviewContributor>)
+    fun updatePage(contributors: List<OverviewContributor>)
 
     // リフレッシュ終了通知
     fun refreshStopped()
@@ -28,16 +27,17 @@ interface OverviewViewBindingNotifier {
  * View の ViewModel との同期表示を管理する
  */
 class OverviewViewBinding(
-    private val binding: FragmentOverviewBinding) : OverviewViewBindingNotifier {
+    private val binding: FragmentOverviewBinding
+) : OverviewViewBindingNotifier {
 
     val root: View
         get() = binding.root
 
     private lateinit var _notify: OverviewViewModelNotifier
-    private val notify:OverviewViewModelNotifier
+    private val notify: OverviewViewModelNotifier
         get() = _notify
 
-    private lateinit var contributorListAdapter : OverviewContributorsAdapter
+    private lateinit var contributorListAdapter: OverviewContributorsAdapter
 
     fun setup(fragment: OverviewFragment, ViewModelNotifier: OverviewViewModelNotifier) {
         debugLog("OverviewViewBinding  setup start")
@@ -75,7 +75,7 @@ class OverviewViewBinding(
         debugLog("OverviewViewBinding  refreshStopped")
     }
 
-    override fun updatePage(contributors : List<OverviewContributor>) {
+    override fun updatePage(contributors: List<OverviewContributor>) {
         debugLog("OverviewViewBinding  updatePage(${contributors.size})")
 
         // リストを更新
@@ -84,7 +84,7 @@ class OverviewViewBinding(
 
     override fun showNotice(@StringRes messageId: Int) {
         // ユーザへメッセージを通知
-        val message : String = binding.root.context.getString(messageId)
+        val message: String = binding.root.context.getString(messageId)
         Toast.makeText(binding.root.context, message, Toast.LENGTH_LONG).show()
     }
 }

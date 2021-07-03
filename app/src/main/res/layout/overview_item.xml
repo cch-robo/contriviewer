@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/contributor_item"
     android:layout_width="match_parent"
@@ -35,7 +33,7 @@
             android:layout_gravity="start|center_vertical"
             android:padding="8dp"
             android:textSize="10pt"
-            tools:text="@string/contributor_name_sample"/>
+            tools:text="@string/contributor_name_sample" />
 
         <TextView
             android:id="@+id/contributor_contribution"
@@ -44,7 +42,7 @@
             android:layout_gravity="end|center_vertical"
             android:padding="8dp"
             android:textSize="10pt"
-            tools:text="@string/contributor_contribution_sample"/>
+            tools:text="@string/contributor_contribution_sample" />
 
     </LinearLayout>
 
