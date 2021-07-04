@@ -58,7 +58,7 @@ class GithubApiOverviewUnitTest {
     private fun setupContributors() {
         val scope = CoroutineScope(Job() + Dispatchers.IO)
         scope.launch {
-            val response = OverviewService.retrofitService.getContributors()
+            val response = OverviewService.retrofitService.getContributors(30, 1, false)
             contributors = response
         }
     }

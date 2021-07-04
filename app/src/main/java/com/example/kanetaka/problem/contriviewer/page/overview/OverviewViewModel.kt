@@ -7,7 +7,9 @@ import com.example.kanetaka.problem.contriviewer.R
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewService
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 /**
@@ -55,7 +57,7 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
             val results = mutableListOf<OverviewContributor>()
 
             val result = try {
-                val response = OverviewService.retrofitService.getContributors()
+                val response = OverviewService.retrofitService.getContributors(100, 1, false)
                 response.forEach { prop: OverviewModel ->
                     debugLog("login=${prop.login}, contributions=${prop.contributions}, url=${prop.url}")
                     results.add(
