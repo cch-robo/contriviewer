@@ -1,11 +1,10 @@
-package com.example.kanetaka.problem.contriviewer.page.overview
+package com.example.kanetaka.problem.contriviewer.page.detail
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kanetaka.problem.contriviewer.R
-import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
-import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewService
+import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailService
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,33 +15,42 @@ import kotlinx.coroutines.withContext
  * ViewModel用の通知インターフェース。
  * ViewBinding から ViewModel への通知インターフェースを提供します。
  */
-interface OverviewViewModelNotifier {
-    // コントリビュータ一覧リフレッシュ開始通知
-    fun refreshContributors()
+interface DetailViewModelNotifier {
+    // コントリビュータ・リフレッシュ開始通知
+    fun refreshContributor()
 }
 
 /**
  * ViewModel として View の状態値を管理する
  */
-class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
-    private lateinit var _notify: OverviewViewBindingNotifier
-    private val notify: OverviewViewBindingNotifier
+class DetailViewModel : ViewModel(), DetailViewModelNotifier {
+    private lateinit var _notify: DetailViewBindingNotifier
+    private val notify: DetailViewBindingNotifier
         get() = _notify
 
-    // コントリビュータ一覧
-    private val _contributors = mutableListOf<OverviewContributor>()
-    private var _contributorsObserver = MutableLiveData<MutableList<OverviewContributor>>()
+    private lateinit var _login: String
+    private val login: String
+        get() = _login
 
-    fun setup(fragment: OverviewFragment, viewBindingNotifier: OverviewViewBindingNotifier) {
+    // コントリビューター
+    private val contributor = MutableLiveData<DetailContributor>()
+
+    fun setup(
+        fragment: DetailFragment,
+        viewBindingNotifier: DetailViewBindingNotifier,
+        login: String
+    ) {
         _notify = viewBindingNotifier
 
+        _login = login
+
         // コントリビュータ一覧更新通知
-        _contributorsObserver.observe(fragment, {
+        contributor.observe(fragment, {
             _notify.updatePage(it)
         })
 
         // コントリビュータ一覧更新要求を通知
-        if (_contributors.isEmpty()) {
+        if (contributor.value == null) {
             notify.showNotice(R.string.contributors_overview_refresh_request)
         }
     }
@@ -50,29 +58,35 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
     /**
      * コントリビュータ情報をリフレシュする。
      */
-    override fun refreshContributors() {
+    override fun refreshContributor() {
         // IOスレッドでサーバからコントリビュータ情報を取得する
         viewModelScope.launch {
             debugLog("refreshContributors  refresh start!!")
-            val results = mutableListOf<OverviewContributor>()
+            var property: DetailContributor?
 
             val result = try {
-                val response = OverviewService.retrofitService.getContributors(100, 1, false)
-                response.forEach { prop: OverviewModel ->
-                    debugLog("login=${prop.login}, contributions=${prop.contributions}, url=${prop.url}")
-                    results.add(
-                        OverviewContributor(
-                            prop.id,
-                            prop.login,
-                            prop.avatar_url,
-                            prop.contributions,
-                            prop.url
-                        )
-                    )
-                }
+                val response = DetailService.retrofitService.getContributor(login)
+
+                debugLog("login=${response.login}, name=${response.name}")
+                property = DetailContributor(
+                    response.avatar_url,
+                    response.login,
+                    response.name,
+                    response.bio,
+                    response.company,
+                    response.location,
+                    response.email,
+                    response.blog,
+                    response.twitter_username,
+                    response.followers,
+                    response.following,
+                    response.public_repos,
+                    response.public_gists
+                )
                 Result.success("success")
             } catch (e: Exception) {
                 debugLog("refreshContributors exception ${e.message}")
+                property = null
                 Result.failure<Exception>(e)
             } finally {
             }
@@ -83,11 +97,11 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
                 notify.refreshStopped()
 
                 if (result.isSuccess) {
-                    // コントリビュータ一覧更新
-                    _contributors.clear()
-                    _contributors.addAll(results)
-                    _contributorsObserver.value = _contributors
+                    // コントリビュータ更新
+                    contributor.value = property
                 } else {
+                    // コントリビュータ更新
+                    contributor.value = null
                     notify.showNotice(R.string.contributors_overview_refresh_error)
                     debugLog("refreshContributors failed")
                 }

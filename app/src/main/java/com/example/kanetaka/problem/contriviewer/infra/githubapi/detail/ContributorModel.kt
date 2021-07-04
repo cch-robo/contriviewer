@@ -21,7 +21,7 @@ data class ContributorModel(
     val site_admin: Boolean,
     val name: String?,
     val company: String?,
-    val blog: String?,
+    val blog: String,
     val location: String?,
     val email: String?,
     val hireable: Boolean?,
