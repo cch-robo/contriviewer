@@ -52,7 +52,7 @@
                         android:layout_height="wrap_content"
                         android:padding="4dp"
                         android:textSize="12pt"
-                        tools:text="名前" />
+                        tools:text="name" />
 
                     <TextView
                         android:id="@+id/textview_login"
@@ -60,7 +60,7 @@
                         android:layout_height="wrap_content"
                         android:padding="4dp"
                         android:textSize="10pt"
-                        tools:text="ログイン名" />
+                        tools:text="login" />
 
                     <TextView
                         android:id="@+id/textview_bio"
@@ -69,7 +69,7 @@
                         android:padding="4dp"
                         android:textSize="8pt"
                         android:textStyle="bold"
-                        tools:text="自己紹介" />
+                        tools:text="biography" />
 
                 </LinearLayout>
 
@@ -103,7 +103,7 @@
                     android:textSize="10pt"
                     android:drawablePadding="8dp"
                     app:drawableLeftCompat="@drawable/baseline_business_24"
-                    tools:text="会社" />
+                    tools:text="company" />
 
                 <TextView
                     android:id="@+id/textview_location"
@@ -112,7 +112,7 @@
                     android:textSize="10pt"
                     android:drawablePadding="8dp"
                     app:drawableLeftCompat="@drawable/baseline_location_on_24"
-                    tools:text="住所" />
+                    tools:text="location" />
 
                 <TextView
                     android:id="@+id/textview_email"
@@ -122,7 +122,7 @@
                     android:textSize="10pt"
                     android:drawablePadding="8dp"
                     app:drawableLeftCompat="@drawable/baseline_email_24"
-                    tools:text="メール" />
+                    tools:text="email" />
 
                 <TextView
                     android:id="@+id/textview_blog"
@@ -142,35 +142,35 @@
                     android:drawablePadding="8dp"
                     android:autoLink="web"
                     app:drawableLeftCompat="@drawable/baseline_flutter_dash_24"
-                    tools:text="https://twitter.com/a7madhegazy" />
+                    tools:text="https://twitter.com/itsdustinlam" />
 
                 <TextView
                     android:id="@+id/textview_followers"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="10pt"
-                    tools:text="100" />
+                    tools:text="followers  100" />
 
                 <TextView
                     android:id="@+id/textview_following"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="10pt"
-                    tools:text="10" />
+                    tools:text="following  10" />
 
                 <TextView
                     android:id="@+id/textview_public_repos"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="10pt"
-                    tools:text="20" />
+                    tools:text="public repos  20" />
 
                 <TextView
                     android:id="@+id/textview_public_gists"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="10pt"
-                    tools:text="30" />
+                    tools:text="public gists  30" />
 
             </LinearLayout>
 
