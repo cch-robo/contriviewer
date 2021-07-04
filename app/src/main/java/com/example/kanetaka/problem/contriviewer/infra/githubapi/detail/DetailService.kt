@@ -11,7 +11,7 @@ private const val BASE_URL = "https://api.github.com/users/"
 
 interface DetailServiceApi {
     @GET
-    suspend fun getContributor(@Url login: String): ContributorModel
+    suspend fun getContributor(@Url login: String): DetailModel
 }
 
 private val moshi = Moshi.Builder()
