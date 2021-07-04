@@ -19,6 +19,9 @@ interface OverviewViewBindingNotifier {
     // リフレッシュ終了通知
     fun refreshStopped()
 
+    // リフレッシュエラー通知
+    fun refreshErrored()
+
     // ユーザへのメッセージ依頼通知
     fun showNotice(@StringRes messageId: Int)
 }
@@ -65,6 +68,9 @@ class OverviewViewBinding(
 
     private fun refreshStart() {
         debugLog("OverviewViewBinding  refreshStart")
+        // コネクションエラー表示を消去
+        binding.overviewConnectionError.visibility = View.GONE
+
         // Swipe によりプログレスが回りだしたので、コントリビュータ一覧を更新する。
         notify.refreshContributors()
     }
@@ -75,8 +81,20 @@ class OverviewViewBinding(
         debugLog("OverviewViewBinding  refreshStopped")
     }
 
+    override fun refreshErrored() {
+        // コントリビュータ一覧を表示不可にする
+        binding.overviewList.visibility = View.GONE
+
+        // コネクションエラー表示を表示
+        binding.overviewConnectionError.visibility = View.VISIBLE
+        debugLog("OverviewViewBinding  refreshErrored")
+    }
+
     override fun updatePage(contributors: List<OverviewContributor>) {
         debugLog("OverviewViewBinding  updatePage(${contributors.size})")
+
+        // コントリビュータ一覧を表示可能にする
+        binding.overviewList.visibility = View.VISIBLE
 
         // リストを更新
         contributorListAdapter.submitList(contributors)
