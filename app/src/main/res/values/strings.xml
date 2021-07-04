@@ -13,5 +13,10 @@
     <string name="contributors_overview_refresh_error">Failed to get the contributors overview.</string>
     <string name="contributors_overview_refresh_request">Swipe down to update the contributor overview.</string>
 
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <!-- Contributor Detail view bind text template -->
+    <string name="contributor_detail_twitter_template">https://twitter.com/</string>
+    <string name="contributor_detail_followers_template">followers</string>
+    <string name="contributor_detail_following_template">following</string>
+    <string name="contributor_detail_public_repos_template">public repos</string>
+    <string name="contributor_detail_public_gists_template">public gists</string>
 </resources>
