@@ -4,8 +4,6 @@
     <!-- Strings used for fragments for navigation -->
     <string name="overview_fragment_label">Contributors Overview</string>
     <string name="detail_fragment_label">Contributor Detail</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
 
     <string name="contributor_icon_description">icon of contributor</string>
     <string name="contributor_name_sample">sample</string>
