@@ -1,2 +1,2 @@
-# contriviewer
-Android Architecture Components samplesリポジトリの contributors を表示する Android アプリ
+# Contri Viewer
+Android Architecture Components samplesリポジトリの contributors を確認閲覧(viewer)する Android アプリ
