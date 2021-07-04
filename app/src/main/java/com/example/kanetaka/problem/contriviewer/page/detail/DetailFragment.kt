@@ -40,6 +40,7 @@ class DetailFragment : Fragment() {
         viewModel.setup(this, viewBinding, detailArguments.login)
         viewBinding.setup(viewModel)
 
+        // コントリビュータ詳細を更新する
         viewModel.refreshContributor()
     }
 }

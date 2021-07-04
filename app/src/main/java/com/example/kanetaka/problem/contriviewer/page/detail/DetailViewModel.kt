@@ -48,17 +48,15 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
         contributor.observe(fragment, {
             _notify.updatePage(it)
         })
-
-        // コントリビュータ一覧更新要求を通知
-        if (contributor.value == null) {
-            notify.showNotice(R.string.contributors_overview_refresh_request)
-        }
     }
 
     /**
      * コントリビュータ情報をリフレシュする。
      */
     override fun refreshContributor() {
+        // ViewBinding にリフレッシュが開始したことを通知
+        notify.refreshStart()
+
         // IOスレッドでサーバからコントリビュータ情報を取得する
         viewModelScope.launch {
             debugLog("refreshContributors  refresh start!!")
@@ -102,7 +100,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
                 } else {
                     // コントリビュータ更新
                     contributor.value = null
-                    notify.showNotice(R.string.contributors_overview_refresh_error)
+                    notify.showNotice(R.string.contributor_detail_refresh_error)
                     debugLog("refreshContributors failed")
                 }
                 debugLog("refreshContributors  refresh END!!")
