@@ -12,14 +12,6 @@ import com.example.kanetaka.problem.contriviewer.databinding.OverviewItemBinding
 import com.example.kanetaka.problem.contriviewer.page.detail.DetailContributorArguments
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
-data class OverviewContributor(
-    val id: Long,
-    val name: String,
-    val iconUrl: String,
-    val contributions: Long,
-    val contributorUrl: String
-)
-
 class OverviewContributorsAdapter(private val fragment: OverviewFragment) :
     ListAdapter<OverviewContributor, RecyclerView.ViewHolder>(OverviewContributorDiffCallback()) {
 
