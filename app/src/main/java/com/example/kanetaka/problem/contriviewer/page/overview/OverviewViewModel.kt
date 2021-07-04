@@ -32,6 +32,8 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
     // コントリビュータ一覧
     private val _contributors = mutableListOf<OverviewContributor>()
     private var _contributorsObserver = MutableLiveData<MutableList<OverviewContributor>>()
+    val contributors: MutableList<OverviewContributor>?
+        get() = _contributorsObserver.value
 
     fun setup(fragment: OverviewFragment, viewBindingNotifier: OverviewViewBindingNotifier) {
         _notify = viewBindingNotifier
@@ -89,6 +91,7 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
                     _contributorsObserver.value = _contributors
                 } else {
                     notify.showNotice(R.string.contributors_overview_refresh_error)
+                    notify.refreshErrored()
                     debugLog("refreshContributors failed")
                 }
                 debugLog("refreshContributors  refresh END!!")

@@ -32,6 +32,11 @@ class OverviewFragment : Fragment() {
 
         viewModel.setup(this, viewBinding)
         viewBinding.setup(this, viewModel)
+
+        if (viewModel.contributors == null || viewModel.contributors!!.isEmpty()) {
+            // コントリビュータ一覧を更新する
+            viewModel.refreshContributors()
+        }
     }
 
 }

@@ -33,7 +33,7 @@
             android:layout_gravity="start|center_vertical"
             android:padding="8dp"
             android:textSize="10pt"
-            tools:text="@string/contributor_name_sample" />
+            tools:text="sample" />
 
         <TextView
             android:id="@+id/contributor_contribution"
@@ -42,7 +42,7 @@
             android:layout_gravity="end|center_vertical"
             android:padding="8dp"
             android:textSize="10pt"
-            tools:text="@string/contributor_contribution_sample" />
+            tools:text="100" />
 
     </LinearLayout>
 

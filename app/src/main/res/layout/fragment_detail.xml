@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/overview_swipe"
+    android:id="@+id/detail_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".page.detail.DetailFragment">
+
+    <ImageView
+        android:id="@+id/detail_progress"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:background="@drawable/loading_animation"
+        android:contentDescription="@string/detail_progress_icon_description"
+        android:scaleType="fitXY"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/detail_connection_error"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:background="@drawable/ic_connection_error"
+        android:contentDescription="@string/detail_connection_error_icon_description"
+        android:scaleType="fitXY"
+        android:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -35,9 +55,9 @@
                 tools:src="@tools:sample/backgrounds/scenic" />
 
             <ScrollView
+                android:id="@+id/contributor_item_subarea_scroller"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/contributor_item_subarea_scroller">
+                android:layout_height="match_parent">
 
                 <LinearLayout
                     android:id="@+id/contributor_main_item_subarea"
@@ -78,9 +98,9 @@
         </LinearLayout>
 
         <ScrollView
+            android:id="@+id/contributor_sub_item_scroller"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:id="@+id/contributor_sub_item_scroller"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -100,8 +120,8 @@
                     android:id="@+id/textview_company"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="10pt"
                     android:drawablePadding="8dp"
+                    android:textSize="10pt"
                     app:drawableLeftCompat="@drawable/baseline_business_24"
                     tools:text="company" />
 
@@ -109,8 +129,8 @@
                     android:id="@+id/textview_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="10pt"
                     android:drawablePadding="8dp"
+                    android:textSize="10pt"
                     app:drawableLeftCompat="@drawable/baseline_location_on_24"
                     tools:text="location" />
 
@@ -119,8 +139,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:autoLink="email"
-                    android:textSize="10pt"
                     android:drawablePadding="8dp"
+                    android:textSize="10pt"
                     app:drawableLeftCompat="@drawable/baseline_email_24"
                     tools:text="email" />
 
@@ -128,9 +148,9 @@
                     android:id="@+id/textview_blog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="10pt"
-                    android:drawablePadding="8dp"
                     android:autoLink="web"
+                    android:drawablePadding="8dp"
+                    android:textSize="10pt"
                     app:drawableLeftCompat="@drawable/baseline_link_24"
                     tools:text="https://www.dustinlam.com/" />
 
@@ -138,9 +158,9 @@
                     android:id="@+id/textview_twitter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="10pt"
-                    android:drawablePadding="8dp"
                     android:autoLink="web"
+                    android:drawablePadding="8dp"
+                    android:textSize="10pt"
                     app:drawableLeftCompat="@drawable/baseline_flutter_dash_24"
                     tools:text="https://twitter.com/itsdustinlam" />
 
@@ -178,4 +198,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</FrameLayout>

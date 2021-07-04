@@ -6,12 +6,17 @@
     <string name="detail_fragment_label">Contributor Detail</string>
 
     <string name="contributor_icon_description">icon of contributor</string>
-    <string name="contributor_name_sample">sample</string>
-    <string name="contributor_contribution_sample">100</string>
+    <string name="overview_connection_error_icon_description">connection error</string>
+    <string name="detail_progress_icon_description">circle of progress</string>
+    <string name="detail_connection_error_icon_description">connection error</string>
 
     <!-- Contributors Overview messages -->
     <string name="contributors_overview_refresh_error">Failed to get the contributors overview.</string>
-    <string name="contributors_overview_refresh_request">Swipe down to update the contributor overview.</string>
+    <string name="contributors_overview_refresh_request">Swipe down to update the contributors overview.</string>
+
+    <!-- Contributor Detail messages -->
+    <string name="contributor_detail_refresh_error">Failed to get the contributor detail.</string>
+    <string name="contributor_detail_refresh_request">Swipe down to update the contributor detail.</string>
 
     <!-- Contributor Detail view bind text template -->
     <string name="contributor_detail_twitter_template">https://twitter.com/</string>

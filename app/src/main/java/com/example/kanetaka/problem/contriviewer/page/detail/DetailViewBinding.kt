@@ -17,6 +17,9 @@ interface DetailViewBindingNotifier {
     // ページ更新開始通知
     fun updatePage(contributor: DetailContributor?)
 
+    // リフレッシュ開始通知
+    fun refreshStart()
+
     // リフレッシュ終了通知
     fun refreshStopped()
 
@@ -42,22 +45,18 @@ class DetailViewBinding(
         debugLog("DetailViewBinding  setup start")
         _notify = ViewModelNotifier
 
-        // スワイプによるコントリビュータ一覧の更新
-        binding.overviewSwipe.setOnRefreshListener {
-            refreshStart()
-        }
         debugLog("DetailViewBinding  setup end")
     }
 
-    private fun refreshStart() {
+    override fun refreshStart() {
         debugLog("DetailViewBinding  refreshStart")
-        // Swipe によりプログレスが回りだしたので、コントリビュータ一覧を更新する。
-        notify.refreshContributor()
+        // プログレス回転を表示する
+        binding.detailProgress.visibility = View.VISIBLE
     }
 
     override fun refreshStopped() {
-        // Swipe によりプログレスが回っているので、リフレッシュプログレスの回転を止める。
-        binding.overviewSwipe.isRefreshing = false
+        // プログレス回転を消去する
+        binding.detailProgress.visibility = View.GONE
         debugLog("DetailViewBinding  refreshStopped")
     }
 
@@ -72,11 +71,15 @@ class DetailViewBinding(
         if (contributor == null) {
             binding.contributorMainItem.visibility = View.GONE
             binding.contributorSubItem.visibility = View.GONE
+            binding.detailProgress.visibility = View.GONE
+            binding.detailConnectionError.visibility = View.VISIBLE
             return
         }
 
         binding.contributorMainItem.visibility = View.VISIBLE
         binding.contributorSubItem.visibility = View.VISIBLE
+        binding.detailProgress.visibility = View.GONE
+        binding.detailConnectionError.visibility = View.GONE
 
         Glide.with(binding.root.context)
             .load(contributor.iconUrl)
