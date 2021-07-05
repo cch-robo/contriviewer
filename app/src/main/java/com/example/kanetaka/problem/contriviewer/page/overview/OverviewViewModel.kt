@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kanetaka.problem.contriviewer.R
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
-import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewService
+import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,6 +25,10 @@ interface OverviewViewModelNotifier {
  * ViewModel として View の状態値を管理する
  */
 class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
+    private lateinit var _repo: ContriViewerRepository
+    private val repo: ContriViewerRepository
+        get() = _repo
+
     private lateinit var _notify: OverviewViewBindingNotifier
     private val notify: OverviewViewBindingNotifier
         get() = _notify
@@ -35,8 +39,13 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
     val contributors: MutableList<OverviewContributor>?
         get() = _contributorsObserver.value
 
-    fun setup(fragment: OverviewFragment, viewBindingNotifier: OverviewViewBindingNotifier) {
+    fun setup(
+        fragment: OverviewFragment,
+        viewBindingNotifier: OverviewViewBindingNotifier,
+        repo: ContriViewerRepository
+    ) {
         _notify = viewBindingNotifier
+        _repo = repo
 
         // コントリビュータ一覧更新通知
         _contributorsObserver.observe(fragment, {
@@ -54,30 +63,11 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
      */
     override fun refreshContributors() {
         // IOスレッドでサーバからコントリビュータ情報を取得する
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             debugLog("refreshContributors  refresh start!!")
-            val results = mutableListOf<OverviewContributor>()
 
-            val result = try {
-                val response = OverviewService.retrofitService.getContributors(100, 1, false)
-                response.forEach { prop: OverviewModel ->
-                    debugLog("login=${prop.login}, contributions=${prop.contributions}, url=${prop.url}")
-                    results.add(
-                        OverviewContributor(
-                            prop.id,
-                            prop.login,
-                            prop.avatar_url,
-                            prop.contributions,
-                            prop.url
-                        )
-                    )
-                }
-                Result.success("success")
-            } catch (e: Exception) {
-                debugLog("refreshContributors exception ${e.message}")
-                Result.failure<Exception>(e)
-            } finally {
-            }
+            val results = mutableListOf<OverviewContributor>()
+            val result = repo.fetchContributors()
 
             // 上記処理が完了してから、メインスレッドで実行されます。
             withContext(Dispatchers.Main) {
@@ -85,10 +75,24 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
                 notify.refreshStopped()
 
                 if (result.isSuccess) {
+                    result.getOrNull()!!.forEach { model: OverviewModel ->
+                        debugLog("login=${model.login}, contributions=${model.contributions}, url=${model.url}")
+                        results.add(
+                            OverviewContributor(
+                                model.id,
+                                model.login,
+                                model.avatar_url,
+                                model.contributions,
+                                model.url
+                            )
+                        )
+                    }
+
                     // コントリビュータ一覧更新
                     _contributors.clear()
                     _contributors.addAll(results)
                     _contributorsObserver.value = _contributors
+
                 } else {
                     notify.showNotice(R.string.contributors_overview_refresh_error)
                     notify.refreshErrored()
