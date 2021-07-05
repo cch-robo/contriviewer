@@ -7,6 +7,5 @@ Android Architecture Components samplesリポジトリの contributors を確認
 
 ## snapshot
 
-- 2021/07/04 21:00  
-![nexus S API23](./misc/snapshot/snapshot_nexux-S_API23_1.png)  
-![nexus S API23](./misc/snapshot/snapshot_nexux-S_API23_2.png)
+- 2021/07/05 14:00  
+![nexus S API23 snapshots](./misc/snapshot/snapshot_1.png)  
