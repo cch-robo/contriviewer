@@ -28,6 +28,7 @@
         android:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contributor_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".page.detail.DetailFragment">
@@ -115,6 +116,16 @@
                 android:paddingTop="2dp"
                 android:paddingRight="4dp"
                 android:paddingBottom="2dp">
+
+                <TextView
+                    android:id="@+id/textview_account"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autoLink="web"
+                    android:drawablePadding="8dp"
+                    android:textSize="10pt"
+                    app:drawableLeftCompat="@drawable/baseline_account_circle_24"
+                    tools:text="account" />
 
                 <TextView
                     android:id="@+id/textview_company"

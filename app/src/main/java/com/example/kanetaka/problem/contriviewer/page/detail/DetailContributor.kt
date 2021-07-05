@@ -5,6 +5,7 @@ data class DetailContributor(
     val login: String,
     val name: String?,
     val bio: String?,
+    val account: String,
     val company: String?,
     val location: String?,
     val email: String?,
