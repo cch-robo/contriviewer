@@ -52,6 +52,9 @@ class DetailViewBinding(
         debugLog("DetailViewBinding  refreshStart")
         // プログレス回転を表示する
         binding.detailProgress.visibility = View.VISIBLE
+
+        // リフレッシュ中は、ページ更新まで詳細表示を隠します。
+        binding.contributorContents.visibility = View.GONE
     }
 
     override fun refreshStopped() {
@@ -69,15 +72,13 @@ class DetailViewBinding(
     override fun updatePage(contributor: DetailContributor?) {
         debugLog("DetailViewBinding  updatePage(${contributor?.login})")
         if (contributor == null) {
-            binding.contributorMainItem.visibility = View.GONE
-            binding.contributorSubItem.visibility = View.GONE
+            binding.contributorContents.visibility = View.GONE
             binding.detailProgress.visibility = View.GONE
             binding.detailConnectionError.visibility = View.VISIBLE
             return
         }
 
-        binding.contributorMainItem.visibility = View.VISIBLE
-        binding.contributorSubItem.visibility = View.VISIBLE
+        binding.contributorContents.visibility = View.VISIBLE
         binding.detailProgress.visibility = View.GONE
         binding.detailConnectionError.visibility = View.GONE
 
