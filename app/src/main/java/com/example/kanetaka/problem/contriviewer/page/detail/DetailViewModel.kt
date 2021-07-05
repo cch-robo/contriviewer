@@ -65,7 +65,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
 
         // IOスレッドでサーバからコントリビュータ情報を取得する
         viewModelScope.launch(Dispatchers.IO) {
-            debugLog("refreshContributors  refresh start!!")
+            debugLog("refreshContributor  refresh start!!")
 
             var contributor: DetailContributor?
             val result = repo.fetchContributor(login)
@@ -101,9 +101,9 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
                     // コントリビュータ更新
                     _contributor.value = null
                     notify.showNotice(R.string.contributor_detail_refresh_error)
-                    debugLog("refreshContributors  failed")
+                    debugLog("refreshContributor  failed")
                 }
-                debugLog("refreshContributors  refresh END!!")
+                debugLog("refreshContributor  refresh END!!")
             }
         }
     }
