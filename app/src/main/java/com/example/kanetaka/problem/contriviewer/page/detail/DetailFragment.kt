@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
+import com.example.kanetaka.problem.contriviewer.application.ContriViewerApplication
 import com.example.kanetaka.problem.contriviewer.databinding.FragmentDetailBinding
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
@@ -37,7 +38,12 @@ class DetailFragment : Fragment() {
         val detailArguments = args.detailArguments
         debugLog("DetailFragment#onViewCreated  detailArguments[id:${detailArguments.id}, login:${detailArguments.login}, url:${detailArguments.contributorUrl}]")
 
-        viewModel.setup(this, viewBinding, detailArguments.login)
+        viewModel.setup(
+            this,
+            viewBinding,
+            (this.activity?.application as ContriViewerApplication).repo,
+            detailArguments.login
+        )
         viewBinding.setup(viewModel)
 
         // コントリビュータ詳細を更新する
