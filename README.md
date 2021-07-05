@@ -9,3 +9,4 @@ Android Architecture Components samplesリポジトリの contributors を確認
 
 - 2021/07/05 14:00  
 ![nexus S API23 snapshots](./misc/snapshot/snapshot_1.png)  
+![pixel3a API30 snapshot 2](./misc/snapshot/snapshot_pixel-3a_API30_2.png)
