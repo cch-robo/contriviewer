@@ -91,6 +91,7 @@ class DetailViewBinding(
         setupTextView(binding.textviewName, contributor.name)
         setupTextView(binding.textviewBio, contributor.bio)
 
+        setupTextView(binding.textviewAccount, contributor.account)
         setupTextView(binding.textviewCompany, contributor.company)
         setupTextView(binding.textviewLocation, contributor.location)
         setupTextView(binding.textviewEmail, contributor.email)

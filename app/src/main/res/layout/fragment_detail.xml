@@ -117,6 +117,16 @@
                 android:paddingBottom="2dp">
 
                 <TextView
+                    android:id="@+id/textview_account"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autoLink="web"
+                    android:drawablePadding="8dp"
+                    android:textSize="10pt"
+                    app:drawableLeftCompat="@drawable/baseline_account_circle_24"
+                    tools:text="account" />
+
+                <TextView
                     android:id="@+id/textview_company"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

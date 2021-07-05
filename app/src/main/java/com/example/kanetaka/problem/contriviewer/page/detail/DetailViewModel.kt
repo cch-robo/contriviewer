@@ -84,6 +84,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
                         model.login,
                         model.name,
                         model.bio,
+                        model.html_url,
                         model.company,
                         model.location,
                         model.email,
