@@ -7,11 +7,17 @@ import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.Overvi
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
 class ContributorRepository : ContriViewerRepository {
+    // コントリビュータ情報キャッシュ
+    private val cache = ContributorCaches()
 
     /**
      * コントリビュータ一覧をフェッチする。
      */
     override suspend fun fetchContributors(): Result<List<OverviewModel>> {
+        if (cache.isCachedOverview()) {
+            return cache.getCachedOverview()
+        }
+
         val result: Result<List<OverviewModel>> = try {
             val response = OverviewService.retrofitService.getContributors(100, 1, false)
             Result.success(response)
@@ -20,6 +26,8 @@ class ContributorRepository : ContriViewerRepository {
             Result.failure(e)
         } finally {
         }
+
+        cache.setCacheOverview(result)
         return result
     }
 
@@ -27,16 +35,22 @@ class ContributorRepository : ContriViewerRepository {
      * コントリビュータ情報をフェッチする。
      */
     override suspend fun fetchContributor(login: String): Result<DetailModel> {
+        if (cache.isCachedDetail(login)) {
+            return cache.getCachedDetail(login)
+        }
+
         val result: Result<DetailModel> = try {
             val response = DetailService.retrofitService.getContributor(login)
 
             debugLog("login=${response.login}, name=${response.name}")
             Result.success(response)
         } catch (e: Exception) {
-            debugLog("refreshContributors exception ${e.message}")
+            debugLog("fetchContributor exception ${e.message}")
             Result.failure(e)
         } finally {
         }
+
+        cache.addCacheDetail(login, result)
         return result
     }
 }
