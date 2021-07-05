@@ -4,7 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kanetaka.problem.contriviewer.R
-import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailService
+import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,6 +24,10 @@ interface DetailViewModelNotifier {
  * ViewModel として View の状態値を管理する
  */
 class DetailViewModel : ViewModel(), DetailViewModelNotifier {
+    private lateinit var _repo: ContriViewerRepository
+    private val repo: ContriViewerRepository
+        get() = _repo
+
     private lateinit var _notify: DetailViewBindingNotifier
     private val notify: DetailViewBindingNotifier
         get() = _notify
@@ -33,19 +37,21 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
         get() = _login
 
     // コントリビューター
-    private val contributor = MutableLiveData<DetailContributor>()
+    private var _contributor = MutableLiveData<DetailContributor>()
 
     fun setup(
         fragment: DetailFragment,
         viewBindingNotifier: DetailViewBindingNotifier,
+        repo: ContriViewerRepository,
         login: String
     ) {
         _notify = viewBindingNotifier
+        _repo = repo
 
         _login = login
 
         // コントリビュータ一覧更新通知
-        contributor.observe(fragment, {
+        _contributor.observe(fragment, {
             _notify.updatePage(it)
         })
     }
@@ -58,36 +64,11 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
         notify.refreshStart()
 
         // IOスレッドでサーバからコントリビュータ情報を取得する
-        viewModelScope.launch {
-            debugLog("refreshContributors  refresh start!!")
-            var property: DetailContributor?
+        viewModelScope.launch(Dispatchers.IO) {
+            debugLog("refreshContributor  refresh start!!")
 
-            val result = try {
-                val response = DetailService.retrofitService.getContributor(login)
-
-                debugLog("login=${response.login}, name=${response.name}")
-                property = DetailContributor(
-                    response.avatar_url,
-                    response.login,
-                    response.name,
-                    response.bio,
-                    response.company,
-                    response.location,
-                    response.email,
-                    response.blog,
-                    response.twitter_username,
-                    response.followers,
-                    response.following,
-                    response.public_repos,
-                    response.public_gists
-                )
-                Result.success("success")
-            } catch (e: Exception) {
-                debugLog("refreshContributors exception ${e.message}")
-                property = null
-                Result.failure<Exception>(e)
-            } finally {
-            }
+            var contributor: DetailContributor?
+            val result = repo.fetchContributor(login)
 
             // 上記処理が完了してから、メインスレッドで実行されます。
             withContext(Dispatchers.Main) {
@@ -95,15 +76,34 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
                 notify.refreshStopped()
 
                 if (result.isSuccess) {
+                    val model = result.getOrNull()!!
+                    debugLog("login=${model.login}, name=${model.name}")
+
+                    contributor = DetailContributor(
+                        model.avatar_url,
+                        model.login,
+                        model.name,
+                        model.bio,
+                        model.company,
+                        model.location,
+                        model.email,
+                        model.blog,
+                        model.twitter_username,
+                        model.followers,
+                        model.following,
+                        model.public_repos,
+                        model.public_gists
+                    )
+
                     // コントリビュータ更新
-                    contributor.value = property
+                    _contributor.value = contributor
                 } else {
                     // コントリビュータ更新
-                    contributor.value = null
+                    _contributor.value = null
                     notify.showNotice(R.string.contributor_detail_refresh_error)
-                    debugLog("refreshContributors failed")
+                    debugLog("refreshContributor  failed")
                 }
-                debugLog("refreshContributors  refresh END!!")
+                debugLog("refreshContributor  refresh END!!")
             }
         }
     }

@@ -1,6 +1,6 @@
 package com.example.kanetaka.problem.contriviewer
 
-import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.ContributorModel
+import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,7 @@ import org.junit.Test
  * DetailService 動作確認（ネットワークが機能するときしかテストできません）
  */
 class GithubApiDetailUnitTest {
-    private lateinit var contributor: ContributorModel
+    private lateinit var contributor: DetailModel
 
     @Before
     fun setUp() {

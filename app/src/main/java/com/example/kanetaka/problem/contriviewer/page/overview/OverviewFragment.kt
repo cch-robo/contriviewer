@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.kanetaka.problem.contriviewer.application.ContriViewerApplication
 import com.example.kanetaka.problem.contriviewer.databinding.FragmentOverviewBinding
 
 class OverviewFragment : Fragment() {
@@ -30,7 +31,11 @@ class OverviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.setup(this, viewBinding)
+        viewModel.setup(
+            this,
+            viewBinding,
+            (this.activity?.application as ContriViewerApplication).repo
+        )
         viewBinding.setup(this, viewModel)
 
         if (viewModel.contributors == null || viewModel.contributors!!.isEmpty()) {

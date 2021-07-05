@@ -1,6 +1,6 @@
 package com.example.kanetaka.problem.contriviewer.infra.githubapi.detail
 
-data class ContributorModel(
+data class DetailModel(
     val login: String,
     val id: Long,
     val node_id: String,
