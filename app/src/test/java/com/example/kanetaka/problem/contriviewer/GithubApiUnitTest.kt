@@ -38,7 +38,7 @@ class GithubApiUnitTest {
      */
     @ExperimentalCoroutinesApi
     @Test
-    fun setupContributor() {
+    fun can_fetch_github_api_contributor() {
         val testDispatcher = TestCoroutineDispatcher()
         val scope = CoroutineScope(Job() + testDispatcher)
         scope.launch {
