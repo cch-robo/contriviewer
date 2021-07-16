@@ -1,4 +1,4 @@
-package com.example.kanetaka.problem.contriviewer
+package com.example.kanetaka.problem.contriviewer.infra
 
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailService
@@ -23,7 +23,7 @@ class GithubApiUnitTest {
     fun can_fetch_github_api_contributors() {
         val testDispatcher = TestCoroutineDispatcher()
         val scope = CoroutineScope(Job() + testDispatcher)
-        scope.launch {
+        scope.launch(Dispatchers.IO) {
             val response = OverviewService.retrofitService.getContributors(30, 1, false)
             val overviews: List<OverviewModel> = response
             assertTrue(overviews.isNotEmpty())
@@ -41,7 +41,7 @@ class GithubApiUnitTest {
     fun can_fetch_github_api_contributor() {
         val testDispatcher = TestCoroutineDispatcher()
         val scope = CoroutineScope(Job() + testDispatcher)
-        scope.launch {
+        scope.launch(Dispatchers.IO) {
             val response = DetailService.retrofitService.getContributor("dlam")
             val contributor: DetailModel = response
 
