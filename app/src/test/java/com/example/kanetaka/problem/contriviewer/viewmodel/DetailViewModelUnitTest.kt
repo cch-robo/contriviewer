@@ -74,7 +74,7 @@ class DetailViewModelUnitTest {
         // FIXME Android Unit Test では、本来実装の LiveData#observer() が反応しないためのテスト用パッチ
         viewModel.contributorObserver.observeForever { fakeViewBindingNotifier.updatePage(it) }
 
-        // viewModelNotify.refreshContributors ⇒ コントリビュータ一覧取得開始
+        // viewBindingNotify.refreshStart ⇒ コントリビュータ取得開始通知
         // viewBindingNotify.refreshStopped ⇒ プログレス終了通知
         // viewBindingNotify.updatePage ⇒ 取得したコントリビュータ一覧で画面更新通知
         viewModel.refreshContributor()
