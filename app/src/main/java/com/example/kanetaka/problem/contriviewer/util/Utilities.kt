@@ -45,4 +45,13 @@ object Utilities {
             Log.d("DEBUG", message)
         }
     }
+
+    /**
+     * デバッグ出力用ログ(Unit Test)
+     */
+    fun debugTestLog(message: String) {
+        if (BuildConfig.DEBUG) {
+            System.out.println(message)
+        }
+    }
 }
