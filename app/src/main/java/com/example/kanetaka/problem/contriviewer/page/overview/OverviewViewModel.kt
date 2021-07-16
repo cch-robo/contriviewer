@@ -39,6 +39,9 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
     val contributors: MutableList<OverviewContributor>?
         get() = _contributorsObserver.value
 
+    // FIXME Android Unit test での Observer リアクション設定用プロパティ（本来不要）
+    var contributorsObserver = MutableLiveData<MutableList<OverviewContributor>>()
+
     fun setup(
         fragment: OverviewFragment,
         viewBindingNotifier: OverviewViewBindingNotifier,
@@ -92,6 +95,12 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
                     _contributors.clear()
                     _contributors.addAll(results)
                     _contributorsObserver.value = _contributors
+                    if (Thread.currentThread().name != "main") {
+                        // FIXME Android Unit Test では、LiveData#observer() が反応しないためのパッチ （対応次第削除すること）
+                        // Android Unit test では、Mainスレッドが Dispatchers.setMain() によりテスト用スレッドになるため、
+                        // スレッド名が main とならないことを利用しています。
+                        contributorsObserver.value = _contributors
+                    }
 
                 } else {
                     notify.showNotice(R.string.contributors_overview_refresh_error)
