@@ -1,4 +1,4 @@
-package com.example.kanetaka.problem.contriviewer
+package com.example.kanetaka.problem.contriviewer.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.kanetaka.problem.contriviewer.page.detail.DetailContributor
