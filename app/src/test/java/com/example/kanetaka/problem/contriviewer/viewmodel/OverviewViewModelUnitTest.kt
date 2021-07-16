@@ -1,4 +1,4 @@
-package com.example.kanetaka.problem.contriviewer
+package com.example.kanetaka.problem.contriviewer.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
@@ -32,7 +32,8 @@ import java.util.concurrent.CountDownLatch
 class OverviewViewModelUnitTest {
     private lateinit var viewModel: OverviewViewModel
     private val fakeViewBindingNotifier = FakeOverviewViewBindingNotifier()
-    private val fakeRepository = FakeContriViewerRepository()
+    private val fakeSuccessRepository = FakeSuccessContriViewerRepository()
+    private val fakeFailedRepository = FakeFailedContriViewerRepository()
 
     // JUnit テスト環境用の CoroutineDispatcher
     private val testDispatcher = TestCoroutineDispatcher()
@@ -61,9 +62,12 @@ class OverviewViewModelUnitTest {
         testDispatcher.cleanupTestCoroutines()
     }
 
+    /**
+     * コントリビュータ一覧取得成功時の処理とフローを確認する。
+     */
     @Test
-    fun refreshContributors() {
-        debugTestLog("before  refreshContributors()")
+    fun success_refreshContributors() {
+        debugTestLog("before  success - refreshContributors()")
         viewModel = OverviewViewModel()
 
         // ViewModel 初期設定
@@ -71,7 +75,7 @@ class OverviewViewModelUnitTest {
         viewModel.setup(
             OverviewFragment(),
             fakeViewBindingNotifier,
-            fakeRepository
+            fakeSuccessRepository
         )
 
         // FIXME Android Unit Test では、本来実装の LiveData#observer() が反応しないためのテスト用パッチ
@@ -84,7 +88,7 @@ class OverviewViewModelUnitTest {
 
         // コントリビュータ一覧取得完了(updatePage完了)まで待機
         fakeViewBindingNotifier.await()
-        debugTestLog("after  refreshContributors()")
+        debugTestLog("after  success - refreshContributors()")
 
         // コントリビュータ一覧取得確認
         assertEquals(1, fakeViewBindingNotifier.contributors.size)
@@ -101,6 +105,44 @@ class OverviewViewModelUnitTest {
         assertEquals(2, fakeViewBindingNotifier.refreshStopped)
         assertEquals(3, fakeViewBindingNotifier.updatePage)
         assertEquals(-1, fakeViewBindingNotifier.refreshErrored)
+    }
+
+    /**
+     * コントリビュータ一覧取得失敗時の処理とフローを確認する。
+     */
+    @Test
+    fun failed_refreshContributors() {
+        debugTestLog("before  failed - refreshContributors()")
+        viewModel = OverviewViewModel()
+
+        // ViewModel 初期設定
+        // viewBindingNotify.showNotice ⇒ スワイプダウンで表示更新を通知
+        viewModel.setup(
+            OverviewFragment(),
+            fakeViewBindingNotifier,
+            fakeFailedRepository
+        )
+
+        // viewModelNotify.refreshContributors ⇒ コントリビュータ一覧取得開始
+        // viewBindingNotify.refreshStopped ⇒ プログレス終了通知
+        // viewBindingNotify.showNotice ⇒ 通信エラー発生を通知
+        // viewBindingNotify.refreshErrored ⇒ コントリビュータ一覧取得エラーを通知
+        viewModel.refreshContributors()
+
+        // コントリビュータ一覧取得完了(updatePage完了)まで待機
+        fakeViewBindingNotifier.await()
+        debugTestLog("after  failed - refreshContributors()")
+
+        // コントリビュータ一覧取得確認
+        assertEquals(0, fakeViewBindingNotifier.contributors.size)
+        debugTestLog("contributors fetch failed")
+
+        // 各種通知への呼出順確認
+        // assertEquals(1, fakeViewBindingNotifier.showNotice)
+        assertEquals(2, fakeViewBindingNotifier.refreshStopped)
+        assertEquals(3, fakeViewBindingNotifier.showNotice)
+        assertEquals(4, fakeViewBindingNotifier.refreshErrored)
+        assertEquals(-1, fakeViewBindingNotifier.updatePage)
     }
 }
 
@@ -134,8 +176,9 @@ private class FakeOverviewViewBindingNotifier : OverviewViewBindingNotifier {
     override fun updatePage(contributors: List<OverviewContributor>) {
         debugTestLog("Called updatePage()")
         _updatePage = (++_operationIndex)
-
         _contributors.addAll(contributors)
+
+        // 成功時の完了待機解除
         _latch.countDown()
     }
 
@@ -147,6 +190,9 @@ private class FakeOverviewViewBindingNotifier : OverviewViewBindingNotifier {
     override fun refreshErrored() {
         debugTestLog("Called refreshErrored()")
         _refreshErrored = (++_operationIndex)
+
+        // エラー時の完了待機解除
+        _latch.countDown()
     }
 
     override fun showNotice(messageId: Int) {
@@ -156,10 +202,10 @@ private class FakeOverviewViewBindingNotifier : OverviewViewBindingNotifier {
 }
 
 /**
- * テスト用 ContriViewerRepository.
+ * テスト用フェッチ成功時 ContriViewerRepository.
  * OverViewViewModel と DetailViewModel から利用できるよう public アクセスとする。
  */
-class FakeContriViewerRepository : ContriViewerRepository {
+class FakeSuccessContriViewerRepository : ContriViewerRepository {
 
     override suspend fun fetchContributors(): Result<List<OverviewModel>> {
         // 実際のコントリビュータ一覧(下記 URL)データから 1名分のみを利用します。

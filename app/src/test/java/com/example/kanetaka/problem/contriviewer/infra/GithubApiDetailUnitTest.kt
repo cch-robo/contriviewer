@@ -1,4 +1,4 @@
-package com.example.kanetaka.problem.contriviewer
+package com.example.kanetaka.problem.contriviewer.infra
 
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailService

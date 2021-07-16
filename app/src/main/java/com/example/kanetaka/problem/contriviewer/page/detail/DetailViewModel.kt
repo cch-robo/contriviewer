@@ -111,6 +111,12 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
                 } else {
                     // コントリビュータ更新
                     _contributorObserver.value = null
+                    if (Thread.currentThread().name != "main") {
+                        // FIXME Android Unit Test では、LiveData#observer() が反応しないためのパッチ （対応次第削除すること）
+                        // Android Unit test では、Mainスレッドが Dispatchers.setMain() によりテスト用スレッドになるため、
+                        // スレッド名が main とならないことを利用しています。
+                        contributorObserver.value = null
+                    }
                     notify.showNotice(R.string.contributor_detail_refresh_error)
                     debugLog("refreshContributor  failed")
                 }
