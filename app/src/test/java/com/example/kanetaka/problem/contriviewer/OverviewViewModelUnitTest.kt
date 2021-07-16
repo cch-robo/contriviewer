@@ -157,8 +157,9 @@ private class FakeOverviewViewBindingNotifier : OverviewViewBindingNotifier {
 
 /**
  * テスト用 ContriViewerRepository.
+ * OverViewViewModel と DetailViewModel から利用できるよう public アクセスとする。
  */
-private class FakeContriViewerRepository : ContriViewerRepository {
+class FakeContriViewerRepository : ContriViewerRepository {
 
     override suspend fun fetchContributors(): Result<List<OverviewModel>> {
         // 実際のコントリビュータ一覧(下記 URL)データから 1名分のみを利用します。
@@ -190,6 +191,42 @@ private class FakeContriViewerRepository : ContriViewerRepository {
     }
 
     override suspend fun fetchContributor(login: String): Result<DetailModel> {
-        TODO("Not yet implemented")
+        // 実際のコントリビュータ(下記 URL)データを利用します。
+        // https://api.github.com/users/dlam
+        val model = DetailModel(
+            "dlam",
+            831038,
+            "MDQ6VXNlcjgzMTAzOA==",
+            "https://avatars.githubusercontent.com/u/831038?v=4",
+            "",
+            "https://api.github.com/users/dlam",
+            "https://github.com/dlam",
+            "https://api.github.com/users/dlam/followers",
+            "https://api.github.com/users/dlam/following{/other_user}",
+            "https://api.github.com/users/dlam/gists{/gist_id}",
+            "https://api.github.com/users/dlam/starred{/owner}{/repo}",
+            "https://api.github.com/users/dlam/subscriptions",
+            "https://api.github.com/users/dlam/orgs",
+            "https://api.github.com/users/dlam/repos",
+            "https://api.github.com/users/dlam/events{/privacy}",
+            "https://api.github.com/users/dlam/received_events",
+            "User",
+            false,
+            "Dustin Lam",
+            "@Google",
+            "https://www.dustinlam.com/",
+            "San Francisco, CA",
+            null,
+            null,
+            null,
+            "itsdustinlam",
+            12,
+            2,
+            67,
+            18,
+            "2011-06-05T16:33:01Z",
+            "2021-07-15T20:36:55Z"
+        )
+        return Result.success(model)
     }
 }
