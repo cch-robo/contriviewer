@@ -37,7 +37,10 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
         get() = _login
 
     // コントリビューター
-    private var _contributor = MutableLiveData<DetailContributor>()
+    private var _contributorObserver = MutableLiveData<DetailContributor>()
+
+    // FIXME Android Unit test での Observer リアクション設定用プロパティ（本来不要）
+    var contributorObserver = MutableLiveData<DetailContributor>()
 
     fun setup(
         fragment: DetailFragment,
@@ -51,7 +54,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
         _login = login
 
         // コントリビュータ一覧更新通知
-        _contributor.observe(fragment, {
+        _contributorObserver.observe(fragment, {
             _notify.updatePage(it)
         })
     }
@@ -97,10 +100,17 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
                     )
 
                     // コントリビュータ更新
-                    _contributor.value = contributor
+                    _contributorObserver.value = contributor
+                    if (Thread.currentThread().name != "main") {
+                        // FIXME Android Unit Test では、LiveData#observer() が反応しないためのパッチ （対応次第削除すること）
+                        // Android Unit test では、Mainスレッドが Dispatchers.setMain() によりテスト用スレッドになるため、
+                        // スレッド名が main とならないことを利用しています。
+                        contributorObserver.value = contributor
+                    }
+
                 } else {
                     // コントリビュータ更新
-                    _contributor.value = null
+                    _contributorObserver.value = null
                     notify.showNotice(R.string.contributor_detail_refresh_error)
                     debugLog("refreshContributor  failed")
                 }
