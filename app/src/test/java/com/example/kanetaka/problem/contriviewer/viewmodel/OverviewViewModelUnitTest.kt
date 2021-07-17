@@ -1,10 +1,12 @@
 package com.example.kanetaka.problem.contriviewer.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
 import com.example.kanetaka.problem.contriviewer.page.overview.OverviewContributor
-import com.example.kanetaka.problem.contriviewer.page.overview.OverviewFragment
 import com.example.kanetaka.problem.contriviewer.page.overview.OverviewViewBindingNotifier
 import com.example.kanetaka.problem.contriviewer.page.overview.OverviewViewModel
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
@@ -22,6 +24,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -46,7 +49,6 @@ class OverviewViewModelUnitTest {
      * このためこのルールがないと、
      * MutableLiveData#observe() のリアクション設定や、
      * MutableLiveData#value = XXX で値を設定できない。
-     * だがルールを設定しても、リアクションは実行されないことに留意。
      */
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
@@ -70,16 +72,17 @@ class OverviewViewModelUnitTest {
         debugTestLog("before  success - refreshContributors()")
         viewModel = OverviewViewModel()
 
+        // LifecycleOwner のフェイクを生成
+        val fragment = FakeOverviewFragment()
+        fragment.setLifecycleState(Lifecycle.State.RESUMED)
+
         // ViewModel 初期設定
         // viewBindingNotify.showNotice ⇒ スワイプダウンで表示更新を通知
         viewModel.setup(
-            OverviewFragment(),
+            fragment.viewLifecycleOwner,
             fakeViewBindingNotifier,
             fakeSuccessRepository
         )
-
-        // FIXME Android Unit Test では、本来実装の LiveData#observer() が反応しないためのテスト用パッチ
-        viewModel.contributorsObserver.observeForever { fakeViewBindingNotifier.updatePage(it) }
 
         // viewModelNotify.refreshContributors ⇒ コントリビュータ一覧取得開始
         // viewBindingNotify.refreshStopped ⇒ プログレス終了通知
@@ -115,10 +118,14 @@ class OverviewViewModelUnitTest {
         debugTestLog("before  failed - refreshContributors()")
         viewModel = OverviewViewModel()
 
+        // LifecycleOwner のフェイクを生成
+        val fragment = FakeOverviewFragment()
+        fragment.setLifecycleState(Lifecycle.State.RESUMED)
+
         // ViewModel 初期設定
         // viewBindingNotify.showNotice ⇒ スワイプダウンで表示更新を通知
         viewModel.setup(
-            OverviewFragment(),
+            fragment.viewLifecycleOwner,
             fakeViewBindingNotifier,
             fakeFailedRepository
         )
@@ -147,13 +154,31 @@ class OverviewViewModelUnitTest {
 }
 
 /**
+ * テスト用 OverviewFragment.
+ */
+private class FakeOverviewFragment : LifecycleOwner {
+    private val _lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
+
+    val viewLifecycleOwner: LifecycleOwner
+        get() = this
+
+    override fun getLifecycle(): Lifecycle {
+        return _lifecycleRegistry
+    }
+
+    fun setLifecycleState(state: Lifecycle.State) {
+        _lifecycleRegistry.currentState = state
+    }
+}
+
+/**
  * テスト用 OverviewBindingNotifier.
  */
 private class FakeOverviewViewBindingNotifier : OverviewViewBindingNotifier {
     // コントリビュータ一覧取得完了待機用ラッチ
     private val _latch: CountDownLatch = CountDownLatch(1)
     fun await() {
-        _latch.await()
+        _latch.await(10000, TimeUnit.MILLISECONDS)
     }
 
     private var _operationIndex = 0
