@@ -78,7 +78,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
                 // ViewBinding にリフレッシュが終了したことを通知
                 notify.refreshStopped()
 
-                if (result.isSuccess) {
+                if (result.isSuccess && result.getOrNull() != null) {
                     val model = result.getOrNull()!!
                     debugLog("login=${model.login}, name=${model.name}")
 

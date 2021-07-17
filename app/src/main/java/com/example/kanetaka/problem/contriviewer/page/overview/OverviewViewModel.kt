@@ -77,7 +77,7 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
                 // ViewBinding にリフレッシュが終了したことを通知
                 notify.refreshStopped()
 
-                if (result.isSuccess) {
+                if (result.isSuccess && result.getOrNull() != null) {
                     result.getOrNull()!!.forEach { model: OverviewModel ->
                         debugLog("login=${model.login}, contributions=${model.contributions}, url=${model.url}")
                         results.add(
