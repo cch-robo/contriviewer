@@ -11,20 +11,19 @@ import com.example.kanetaka.problem.contriviewer.databinding.FragmentOverviewBin
 
 class OverviewFragment : Fragment() {
 
-    private val viewModel: OverviewViewModel by lazy {
-        ViewModelProvider(this).get(OverviewViewModel::class.java)
-    }
+    private lateinit var viewModel: OverviewViewModel
 
-    private lateinit var _viewBinding: OverviewViewBinding
-    private val viewBinding get() = _viewBinding
+    // viewBinding は、_viewBinding 初期化後にしか参照されない。
+    private var _viewBinding: OverviewViewBinding? = null
+    private val viewBinding get() = _viewBinding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        viewModel = ViewModelProvider(this).get(OverviewViewModel::class.java)
         _viewBinding =
             OverviewViewBinding(FragmentOverviewBinding.inflate(inflater, container, false))
-
         return viewBinding.root
     }
 
@@ -32,7 +31,7 @@ class OverviewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.setup(
-            this,
+            this.viewLifecycleOwner,
             viewBinding,
             (this.activity?.application as ContriViewerApplication).repo
         )
@@ -44,4 +43,8 @@ class OverviewFragment : Fragment() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        _viewBinding = null
+    }
 }

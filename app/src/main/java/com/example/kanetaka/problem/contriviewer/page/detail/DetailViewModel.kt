@@ -1,5 +1,6 @@
 package com.example.kanetaka.problem.contriviewer.page.detail
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -39,11 +40,8 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
     // コントリビューター
     private var _contributorObserver = MutableLiveData<DetailContributor>()
 
-    // FIXME Android Unit test での Observer リアクション設定用プロパティ（本来不要）
-    var contributorObserver = MutableLiveData<DetailContributor>()
-
     fun setup(
-        fragment: DetailFragment,
+        viewLifecycleOwner: LifecycleOwner,
         viewBindingNotifier: DetailViewBindingNotifier,
         repo: ContriViewerRepository,
         login: String
@@ -54,7 +52,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
         _login = login
 
         // コントリビュータ一覧更新通知
-        _contributorObserver.observe(fragment, {
+        _contributorObserver.observe(viewLifecycleOwner, {
             _notify.updatePage(it)
         })
     }
@@ -78,7 +76,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
                 // ViewBinding にリフレッシュが終了したことを通知
                 notify.refreshStopped()
 
-                if (result.isSuccess) {
+                if (result.isSuccess && result.getOrNull() != null) {
                     val model = result.getOrNull()!!
                     debugLog("login=${model.login}, name=${model.name}")
 
@@ -101,22 +99,10 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
 
                     // コントリビュータ更新
                     _contributorObserver.value = contributor
-                    if (Thread.currentThread().name != "main") {
-                        // FIXME Android Unit Test では、LiveData#observer() が反応しないためのパッチ （対応次第削除すること）
-                        // Android Unit test では、Mainスレッドが Dispatchers.setMain() によりテスト用スレッドになるため、
-                        // スレッド名が main とならないことを利用しています。
-                        contributorObserver.value = contributor
-                    }
 
                 } else {
                     // コントリビュータ更新
                     _contributorObserver.value = null
-                    if (Thread.currentThread().name != "main") {
-                        // FIXME Android Unit Test では、LiveData#observer() が反応しないためのパッチ （対応次第削除すること）
-                        // Android Unit test では、Mainスレッドが Dispatchers.setMain() によりテスト用スレッドになるため、
-                        // スレッド名が main とならないことを利用しています。
-                        contributorObserver.value = null
-                    }
                     notify.showNotice(R.string.contributor_detail_refresh_error)
                     debugLog("refreshContributor  failed")
                 }
