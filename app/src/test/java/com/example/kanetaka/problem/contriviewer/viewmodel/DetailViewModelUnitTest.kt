@@ -1,10 +1,12 @@
 package com.example.kanetaka.problem.contriviewer.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
 import com.example.kanetaka.problem.contriviewer.page.detail.DetailContributor
-import com.example.kanetaka.problem.contriviewer.page.detail.DetailFragment
 import com.example.kanetaka.problem.contriviewer.page.detail.DetailViewBindingNotifier
 import com.example.kanetaka.problem.contriviewer.page.detail.DetailViewModel
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
@@ -22,6 +24,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -46,7 +49,6 @@ class DetailViewModelUnitTest {
      * このためこのルールがないと、
      * MutableLiveData#observe() のリアクション設定や、
      * MutableLiveData#value = XXX で値を設定できない。
-     * だがルールを設定しても、リアクションは実行されないことに留意。
      */
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
@@ -70,16 +72,17 @@ class DetailViewModelUnitTest {
         debugTestLog("before  success - refreshContributor()")
         viewModel = DetailViewModel()
 
+        // LifecycleOwner のフェイクを生成
+        val fragment = FakeDetailFragment()
+        fragment.setLifecycleState(Lifecycle.State.RESUMED)
+
         // ViewModel 初期設定
         viewModel.setup(
-            DetailFragment(),
+            fragment.viewLifecycleOwner,
             fakeViewBindingNotifier,
             fakeSuccessRepository,
             "dlam"
         )
-
-        // FIXME Android Unit Test では、本来実装の LiveData#observer() が反応しないためのテスト用パッチ
-        viewModel.contributorObserver.observeForever { fakeViewBindingNotifier.updatePage(it) }
 
         // viewBindingNotify.refreshStart ⇒ コントリビュータ取得開始通知
         // viewBindingNotify.refreshStopped ⇒ プログレス終了通知
@@ -113,16 +116,17 @@ class DetailViewModelUnitTest {
         debugTestLog("before  failed - refreshContributor()")
         viewModel = DetailViewModel()
 
+        // LifecycleOwner のフェイクを生成
+        val fragment = FakeDetailFragment()
+        fragment.setLifecycleState(Lifecycle.State.RESUMED)
+
         // ViewModel 初期設定
         viewModel.setup(
-            DetailFragment(),
+            fragment.viewLifecycleOwner,
             fakeViewBindingNotifier,
             fakeFailedRepository,
             "dlam"
         )
-
-        // FIXME Android Unit Test では、本来実装の LiveData#observer() が反応しないためのテスト用パッチ
-        viewModel.contributorObserver.observeForever { fakeViewBindingNotifier.updatePage(it) }
 
         // viewBindingNotify.refreshStart ⇒ コントリビュータ取得開始通知
         // viewBindingNotify.refreshStopped ⇒ プログレス終了通知
@@ -148,13 +152,31 @@ class DetailViewModelUnitTest {
 }
 
 /**
+ * テスト用 DetailFragment.
+ */
+private class FakeDetailFragment : LifecycleOwner {
+    private val _lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
+
+    val viewLifecycleOwner: LifecycleOwner
+        get() = this
+
+    override fun getLifecycle(): Lifecycle {
+        return _lifecycleRegistry
+    }
+
+    fun setLifecycleState(state: Lifecycle.State) {
+        _lifecycleRegistry.currentState = state
+    }
+}
+
+/**
  * テスト用 DetailViewBindingNotifier.
  */
 private class FakeDetailViewBindingNotifier : DetailViewBindingNotifier {
     // コントリビュータ取得完了待機用ラッチ
     private val _latch: CountDownLatch = CountDownLatch(1)
     fun await() {
-        _latch.await()
+        _latch.await(10000, TimeUnit.MILLISECONDS)
     }
 
     private var _operationIndex = 0
@@ -179,7 +201,7 @@ private class FakeDetailViewBindingNotifier : DetailViewBindingNotifier {
         _updatePage = (++_operationIndex)
         _contributor = contributor
 
-        // 成功時の完了待機解除
+        // 成功時/エラー時の完了待機解除
         _latch.countDown()
     }
 
@@ -206,10 +228,20 @@ private class FakeDetailViewBindingNotifier : DetailViewBindingNotifier {
 class FakeFailedContriViewerRepository : ContriViewerRepository {
 
     override suspend fun fetchContributors(): Result<List<OverviewModel>> {
-        return Result.failure(Throwable("Unable to resolve host \"api.github.com\": No address associated with hostname", RuntimeException("Network error!")))
+        return Result.failure(
+            Throwable(
+                "Unable to resolve host \"api.github.com\": No address associated with hostname",
+                RuntimeException("Network error!")
+            )
+        )
     }
 
     override suspend fun fetchContributor(login: String): Result<DetailModel> {
-        return Result.failure(Throwable("Unable to resolve host \"api.github.com\": No address associated with hostname", RuntimeException("Network error!")))
+        return Result.failure(
+            Throwable(
+                "Unable to resolve host \"api.github.com\": No address associated with hostname",
+                RuntimeException("Network error!")
+            )
+        )
     }
 }

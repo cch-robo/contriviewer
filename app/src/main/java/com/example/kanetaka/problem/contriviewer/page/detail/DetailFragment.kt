@@ -16,17 +16,17 @@ class DetailFragment : Fragment() {
     // Navigation Editor で自動生成された遷移パラメータ
     private val args: DetailFragmentArgs by navArgs()
 
-    private val viewModel: DetailViewModel by lazy {
-        ViewModelProvider(this).get(DetailViewModel::class.java)
-    }
+    private lateinit var viewModel: DetailViewModel
 
-    private lateinit var _viewBinding: DetailViewBinding
-    private val viewBinding get() = _viewBinding
+    // viewBinding は、_viewBinding 初期化後にしか参照されない。
+    private var _viewBinding: DetailViewBinding? = null
+    private val viewBinding get() = _viewBinding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        viewModel = ViewModelProvider(this).get(DetailViewModel::class.java)
         _viewBinding =
             DetailViewBinding(FragmentDetailBinding.inflate(inflater, container, false))
         return viewBinding.root
@@ -39,7 +39,7 @@ class DetailFragment : Fragment() {
         debugLog("DetailFragment#onViewCreated  detailArguments[id:${detailArguments.id}, login:${detailArguments.login}, url:${detailArguments.contributorUrl}]")
 
         viewModel.setup(
-            this,
+            this.viewLifecycleOwner,
             viewBinding,
             (this.activity?.application as ContriViewerApplication).repo,
             detailArguments.login
@@ -48,5 +48,10 @@ class DetailFragment : Fragment() {
 
         // コントリビュータ詳細を更新する
         viewModel.refreshContributor()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _viewBinding = null
     }
 }
