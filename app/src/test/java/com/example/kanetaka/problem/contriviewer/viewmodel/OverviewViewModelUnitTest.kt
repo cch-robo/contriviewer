@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import com.example.kanetaka.problem.contriviewer.R
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
 import com.example.kanetaka.problem.contriviewer.page.overview.OverviewContributor
@@ -11,6 +12,7 @@ import com.example.kanetaka.problem.contriviewer.page.overview.OverviewViewBindi
 import com.example.kanetaka.problem.contriviewer.page.overview.OverviewViewModel
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugTestLog
+import com.example.kanetaka.problem.contriviewer.viewmodel.FakeOverviewViewBindingNotifier.Notify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -104,10 +106,16 @@ class OverviewViewModelUnitTest {
         debugTestLog("contributor {id:${contributor.id}, name:${contributor.name}, account:${contributor.contributorUrl}}")
 
         // 各種通知への呼出順確認
-        assertEquals(1, fakeViewBindingNotifier.showNotice)
-        assertEquals(2, fakeViewBindingNotifier.refreshStopped)
-        assertEquals(3, fakeViewBindingNotifier.updatePage)
-        assertEquals(-1, fakeViewBindingNotifier.refreshErrored)
+        assertEquals(3, fakeViewBindingNotifier.notifies.size)
+        assertEquals(Notify.SHOW_NOTICE, fakeViewBindingNotifier.notifies[0].first)
+        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
+        assertEquals(Notify.UPDATE_PAGE, fakeViewBindingNotifier.notifies[2].first)
+
+        // メッセージ確認
+        assertEquals(
+            R.string.contributors_overview_refresh_request,
+            fakeViewBindingNotifier.notifies[0].second
+        )
     }
 
     /**
@@ -145,11 +153,21 @@ class OverviewViewModelUnitTest {
         debugTestLog("contributors fetch failed")
 
         // 各種通知への呼出順確認
-        // assertEquals(1, fakeViewBindingNotifier.showNotice)
-        assertEquals(2, fakeViewBindingNotifier.refreshStopped)
-        assertEquals(3, fakeViewBindingNotifier.showNotice)
-        assertEquals(4, fakeViewBindingNotifier.refreshErrored)
-        assertEquals(-1, fakeViewBindingNotifier.updatePage)
+        assertEquals(4, fakeViewBindingNotifier.notifies.size)
+        assertEquals(Notify.SHOW_NOTICE, fakeViewBindingNotifier.notifies[0].first)
+        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
+        assertEquals(Notify.SHOW_NOTICE, fakeViewBindingNotifier.notifies[2].first)
+        assertEquals(Notify.REFRESH_ERRORED, fakeViewBindingNotifier.notifies[3].first)
+
+        // メッセージ確認
+        assertEquals(
+            R.string.contributors_overview_refresh_request,
+            fakeViewBindingNotifier.notifies[0].second
+        )
+        assertEquals(
+            R.string.contributors_overview_refresh_error,
+            fakeViewBindingNotifier.notifies[2].second
+        )
     }
 }
 
@@ -181,17 +199,10 @@ private class FakeOverviewViewBindingNotifier : OverviewViewBindingNotifier {
         _latch.await(10000, TimeUnit.MILLISECONDS)
     }
 
-    private var _operationIndex = 0
-    private var _updatePage: Int = -1
-    private var _refreshStopped: Int = -1
-    private var _refreshErrored: Int = -1
-    private var _showNotice: Int = -1
-
     // 各種通知への呼出順
-    val updatePage get() = _updatePage
-    val refreshStopped get() = _refreshStopped
-    val refreshErrored get() = _refreshErrored
-    val showNotice get() = _showNotice
+    private var _notifies: MutableList<Pair<Notify, Int>> = mutableListOf()
+    val notifies: List<Pair<Notify, Int>>
+        get() = _notifies
 
     // コントリビュータ一覧
     private var _contributors: MutableList<OverviewContributor> = mutableListOf()
@@ -200,7 +211,7 @@ private class FakeOverviewViewBindingNotifier : OverviewViewBindingNotifier {
 
     override fun updatePage(contributors: List<OverviewContributor>) {
         debugTestLog("Called updatePage()")
-        _updatePage = (++_operationIndex)
+        _notifies.add(Pair(Notify.UPDATE_PAGE, 0))
         _contributors.addAll(contributors)
 
         // 成功時の完了待機解除
@@ -209,12 +220,12 @@ private class FakeOverviewViewBindingNotifier : OverviewViewBindingNotifier {
 
     override fun refreshStopped() {
         debugTestLog("Called refreshStopped()")
-        _refreshStopped = (++_operationIndex)
+        _notifies.add(Pair(Notify.REFRESH_STOPPED, 0))
     }
 
     override fun refreshErrored() {
         debugTestLog("Called refreshErrored()")
-        _refreshErrored = (++_operationIndex)
+        _notifies.add(Pair(Notify.REFRESH_ERRORED, 0))
 
         // エラー時の完了待機解除
         _latch.countDown()
@@ -222,7 +233,15 @@ private class FakeOverviewViewBindingNotifier : OverviewViewBindingNotifier {
 
     override fun showNotice(messageId: Int) {
         debugTestLog("Called showNotice()")
-        _showNotice = (++_operationIndex)
+        _notifies.add(Pair(Notify.SHOW_NOTICE, messageId))
+    }
+
+    // 通知種別
+    enum class Notify {
+        UPDATE_PAGE,
+        REFRESH_STOPPED,
+        REFRESH_ERRORED,
+        SHOW_NOTICE
     }
 }
 

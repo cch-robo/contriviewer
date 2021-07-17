@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import com.example.kanetaka.problem.contriviewer.R
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
 import com.example.kanetaka.problem.contriviewer.page.detail.DetailContributor
@@ -11,6 +12,7 @@ import com.example.kanetaka.problem.contriviewer.page.detail.DetailViewBindingNo
 import com.example.kanetaka.problem.contriviewer.page.detail.DetailViewModel
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugTestLog
+import com.example.kanetaka.problem.contriviewer.viewmodel.FakeDetailViewBindingNotifier.Notify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -102,10 +104,11 @@ class DetailViewModelUnitTest {
         debugTestLog("contributor {login:${contributor?.login}, name:${contributor?.name}, account:${contributor?.account}}")
 
         // 各種通知への呼出順確認
-        assertEquals(1, fakeViewBindingNotifier.refreshStart)
-        assertEquals(2, fakeViewBindingNotifier.refreshStopped)
-        assertEquals(3, fakeViewBindingNotifier.updatePage)
-        assertEquals(-1, fakeViewBindingNotifier.showNotice)
+        assertEquals(3, fakeViewBindingNotifier.notifies.size)
+        assertEquals(Notify.REFRESH_START, fakeViewBindingNotifier.notifies[0].first)
+        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
+        assertEquals(Notify.UPDATE_PAGE, fakeViewBindingNotifier.notifies[2].first)
+        fakeViewBindingNotifier.notifies
     }
 
     /**
@@ -144,10 +147,17 @@ class DetailViewModelUnitTest {
         debugTestLog("contributor fetch failed")
 
         // 各種通知への呼出順確認
-        assertEquals(1, fakeViewBindingNotifier.refreshStart)
-        assertEquals(2, fakeViewBindingNotifier.refreshStopped)
-        assertEquals(3, fakeViewBindingNotifier.updatePage)
-        assertEquals(4, fakeViewBindingNotifier.showNotice)
+        assertEquals(4, fakeViewBindingNotifier.notifies.size)
+        assertEquals(Notify.REFRESH_START, fakeViewBindingNotifier.notifies[0].first)
+        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
+        assertEquals(Notify.UPDATE_PAGE, fakeViewBindingNotifier.notifies[2].first)
+        assertEquals(Notify.SHOW_NOTICE, fakeViewBindingNotifier.notifies[3].first)
+
+        // メッセージ確認
+        assertEquals(
+            R.string.contributor_detail_refresh_error,
+            fakeViewBindingNotifier.notifies[3].second
+        )
     }
 }
 
@@ -179,17 +189,10 @@ private class FakeDetailViewBindingNotifier : DetailViewBindingNotifier {
         _latch.await(10000, TimeUnit.MILLISECONDS)
     }
 
-    private var _operationIndex = 0
-    private var _updatePage: Int = -1
-    private var _refreshStart: Int = -1
-    private var _refreshStopped: Int = -1
-    private var _showNotice: Int = -1
-
     // 各種通知への呼出順
-    val updatePage get() = _updatePage
-    val refreshStart get() = _refreshStart
-    val refreshStopped get() = _refreshStopped
-    val showNotice get() = _showNotice
+    private var _notifies: MutableList<Pair<Notify, Int>> = mutableListOf()
+    val notifies: List<Pair<Notify, Int>>
+        get() = _notifies
 
     // コントリビュータ
     private var _contributor: DetailContributor? = null
@@ -198,7 +201,7 @@ private class FakeDetailViewBindingNotifier : DetailViewBindingNotifier {
 
     override fun updatePage(contributor: DetailContributor?) {
         debugTestLog("Called updatePage()")
-        _updatePage = (++_operationIndex)
+        _notifies.add(Pair(Notify.UPDATE_PAGE, 0))
         _contributor = contributor
 
         // 成功時/エラー時の完了待機解除
@@ -207,17 +210,25 @@ private class FakeDetailViewBindingNotifier : DetailViewBindingNotifier {
 
     override fun refreshStart() {
         debugTestLog("Called refreshStart()")
-        _refreshStart = (++_operationIndex)
+        _notifies.add(Pair(Notify.REFRESH_START, 0))
     }
 
     override fun refreshStopped() {
         debugTestLog("Called refreshStopped()")
-        _refreshStopped = (++_operationIndex)
+        _notifies.add(Pair(Notify.REFRESH_STOPPED, 0))
     }
 
     override fun showNotice(messageId: Int) {
         debugTestLog("Called showNotice()")
-        _showNotice = (++_operationIndex)
+        _notifies.add(Pair(Notify.SHOW_NOTICE, messageId))
+    }
+
+    // 通知種別
+    enum class Notify {
+        UPDATE_PAGE,
+        REFRESH_START,
+        REFRESH_STOPPED,
+        SHOW_NOTICE
     }
 }
 
