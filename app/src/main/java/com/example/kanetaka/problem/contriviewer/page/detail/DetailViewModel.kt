@@ -88,6 +88,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier,
      * コントリビュータ情報をリフレシュする。
      */
     override fun refreshContributor() {
+        debugLog("DetailViewModel  refreshContributor")
         // IOスレッドでサーバからコントリビュータ情報を取得する
         viewModelScope.launch(Dispatchers.IO) {
             debugLog("refreshContributor  refresh start!!")

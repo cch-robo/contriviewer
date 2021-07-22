@@ -88,14 +88,15 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier,
      * スワイプによりコントリビュータ情報をリフレシュする。（ViewBindingに公開する)
      */
     override fun swipeRefreshContributors() {
+        debugLog("OverviewViewModel  swipeRefreshContributors")
         _status.value = OverviewViewModelStatus.SWIPE_REFRESH
-        refreshContributors()
     }
 
     /**
      * コントリビュータ情報をリフレシュする。（ViewBindingに公開する)
      */
     override fun refreshContributors() {
+        debugLog("OverviewViewModel  refreshContributors")
         // IOスレッドでサーバからコントリビュータ情報を取得する
         viewModelScope.launch(Dispatchers.IO) {
             debugLog("refreshContributors  refresh start!!")
