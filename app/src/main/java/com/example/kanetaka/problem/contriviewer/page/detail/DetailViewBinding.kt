@@ -86,29 +86,21 @@ class DetailViewBinding(
         if (viewModel.contributor == null) {
             when (viewModel.status) {
                 DetailViewModelStatus.INIT_REFRESH -> {
-                    binding.contributorContents.visibility = View.GONE
-                    binding.detailProgress.visibility = View.VISIBLE
-                    binding.detailConnectionError.visibility = View.GONE
+                    updatePageStyle(false, true, false)
                 }
                 DetailViewModelStatus.REFRESH_FAILED -> {
-                    binding.contributorContents.visibility = View.GONE
-                    binding.detailProgress.visibility = View.GONE
-                    binding.detailConnectionError.visibility = View.VISIBLE
+                    updatePageStyle(false, true, true)
                     debugLog("DetailViewBinding  refresh Error")
                 }
                 else -> {
                     // REFRESH_CONTRIBUTOR かつコントリビュータ無し
-                    binding.contributorContents.visibility = View.GONE
-                    binding.detailProgress.visibility = View.GONE
-                    binding.detailConnectionError.visibility = View.VISIBLE
+                    updatePageStyle(false, false, true)
                     debugLog("DetailViewBinding  refresh Unexpected")
                 }
             }
         } else {
             if (viewModel.status == DetailViewModelStatus.REFRESH_CONTRIBUTOR) {
-                binding.contributorContents.visibility = View.VISIBLE
-                binding.detailProgress.visibility = View.GONE
-                binding.detailConnectionError.visibility = View.GONE
+                updatePageStyle(true, false, false)
 
                 // contributor コンディションは、not null が保証されている。
                 updatePage(viewModel.contributor!!)
@@ -199,5 +191,23 @@ class DetailViewBinding(
         val text = binding.root.context.getString(stringId) + "  $numeric"
         textView.text = text
         textView.visibility = View.VISIBLE
+    }
+
+    /**
+     * コントリビュータ詳細画面表示スタイル更新
+     */
+    private fun updatePageStyle(
+        isShowContents: Boolean,
+        isShowProgress: Boolean,
+        isShowError: Boolean
+    ) {
+        binding.contributorContents.visibility = getVisibility(isShowContents)
+        binding.detailProgress.visibility = getVisibility(isShowProgress)
+        binding.detailConnectionError.visibility = getVisibility(isShowError)
+    }
+
+    private fun getVisibility(isShow: Boolean): Int {
+        if (isShow) return View.VISIBLE
+        return View.GONE
     }
 }

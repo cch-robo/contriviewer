@@ -36,8 +36,8 @@ class OverviewViewBinding(
     private val viewModel: OverviewViewModel
         get() = _viewModel
 
-    private lateinit var _notify: OverviewViewModelNotifier
-    private val notify: OverviewViewModelNotifier
+    private lateinit var _notify: DestinationUnspecifiedStateChangeNotifier
+    private val notify: DestinationUnspecifiedStateChangeNotifier
         get() = _notify
 
     private lateinit var contributorListAdapter: OverviewContributorsAdapter
@@ -62,7 +62,7 @@ class OverviewViewBinding(
 
         // スワイプによるコントリビュータ一覧の更新
         binding.overviewSwipe.setOnRefreshListener {
-            notify.swipeRefreshContributors()
+            viewModel.swipeRefreshContributors()
         }
         debugLog("OverviewViewBinding  setup end")
     }
@@ -104,21 +104,17 @@ class OverviewViewBinding(
         when (status) {
             OverviewViewModelStatus.INIT_REFRESH -> {
                 // プログレスを表示する
-                binding.overviewProgress.visibility = View.VISIBLE
-                binding.overviewList.visibility = View.GONE
-                binding.overviewConnectionError.visibility = View.GONE
+                updatePageStyle(true, false, false)
             }
             OverviewViewModelStatus.SWIPE_REFRESH -> {
                 // SwipeRefreshLayout のプログレスを利用する
-                binding.overviewProgress.visibility = View.GONE
-                binding.overviewList.visibility = View.GONE
-                binding.overviewConnectionError.visibility = View.GONE
+                updatePageStyle(false, false, false)
             }
             else -> return
         }
 
         // コントリビュータ一覧の状態を更新する。
-        notify.refreshContributors()
+        viewModel.refreshContributors()
     }
 
     /**
@@ -127,7 +123,7 @@ class OverviewViewBinding(
     private fun stopProgress() {
         debugLog("OverviewViewBinding  refreshStopped")
         // プログレス表示を終了する
-        binding.overviewProgress.visibility = View.GONE
+        updatePageStyle(false, false, false)
 
         // Swipe プログレスの回転を止める。
         binding.overviewSwipe.isRefreshing = false
@@ -145,23 +141,20 @@ class OverviewViewBinding(
         if (viewModel.contributors.isEmpty()) {
             when (viewModel.status) {
                 OverviewViewModelStatus.REFRESH_FAILED -> {
-                    binding.overviewList.visibility = View.GONE
-                    binding.overviewConnectionError.visibility = View.VISIBLE
+                    updatePageStyle(false, false, true)
                     debugLog("OverviewViewBinding  refresh Error")
                 }
                 else -> {
                     // INIT_REFRESH か SWIPE_REFRESH もしくは、REFRESH_CONTRIBUTORS かつコントリビュータ一覧無し（想定外）
                     stopProgress()
-                    binding.overviewList.visibility = View.GONE
-                    binding.overviewConnectionError.visibility = View.VISIBLE
+                    updatePageStyle(false, false, true)
                     debugLog("OverviewViewBinding  refresh Unexpected")
                 }
             }
         } else {
             if (viewModel.status == OverviewViewModelStatus.REFRESH_CONTRIBUTORS) {
                 // コントリビュータ一覧を表示可能にする
-                binding.overviewList.visibility = View.VISIBLE
-                binding.overviewConnectionError.visibility = View.GONE
+                updatePageStyle(false, true, false)
             }
         }
     }
@@ -173,5 +166,23 @@ class OverviewViewBinding(
         // ユーザへメッセージを通知
         val message: String = binding.root.context.getString(messageId)
         Toast.makeText(binding.root.context, message, Toast.LENGTH_LONG).show()
+    }
+
+    /**
+     * コントリビュータ一覧画面表示スタイル更新
+     */
+    private fun updatePageStyle(
+        isShowProgress: Boolean,
+        isShowContents: Boolean,
+        isShowError: Boolean
+    ) {
+        binding.overviewProgress.visibility = getVisibility(isShowProgress)
+        binding.overviewList.visibility = getVisibility(isShowContents)
+        binding.overviewConnectionError.visibility = getVisibility(isShowError)
+    }
+
+    private fun getVisibility(isShow: Boolean): Int {
+        if (isShow) return View.VISIBLE
+        return View.GONE
     }
 }
