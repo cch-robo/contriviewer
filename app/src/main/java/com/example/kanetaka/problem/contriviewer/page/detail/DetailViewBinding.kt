@@ -86,10 +86,10 @@ class DetailViewBinding(
         if (viewModel.contributor == null) {
             when (viewModel.status) {
                 DetailViewModelStatus.INIT_REFRESH -> {
-                    updatePageStyle(false, true, false)
+                    updatePageStyle(true, false, false)
                 }
                 DetailViewModelStatus.REFRESH_FAILED -> {
-                    updatePageStyle(false, true, true)
+                    updatePageStyle(false, false, true)
                     debugLog("DetailViewBinding  refresh Error")
                 }
                 else -> {
@@ -100,7 +100,7 @@ class DetailViewBinding(
             }
         } else {
             if (viewModel.status == DetailViewModelStatus.REFRESH_CONTRIBUTOR) {
-                updatePageStyle(true, false, false)
+                updatePageStyle(false, true, false)
 
                 // contributor コンディションは、not null が保証されている。
                 updatePage(viewModel.contributor!!)
@@ -197,12 +197,12 @@ class DetailViewBinding(
      * コントリビュータ詳細画面表示スタイル更新
      */
     private fun updatePageStyle(
-        isShowContents: Boolean,
         isShowProgress: Boolean,
+        isShowContents: Boolean,
         isShowError: Boolean
     ) {
-        binding.contributorContents.visibility = getVisibility(isShowContents)
         binding.detailProgress.visibility = getVisibility(isShowProgress)
+        binding.contributorContents.visibility = getVisibility(isShowContents)
         binding.detailConnectionError.visibility = getVisibility(isShowError)
     }
 
