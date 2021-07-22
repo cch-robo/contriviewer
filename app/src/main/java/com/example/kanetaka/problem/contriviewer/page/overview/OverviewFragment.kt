@@ -36,11 +36,6 @@ class OverviewFragment : Fragment() {
             (this.activity?.application as ContriViewerApplication).repo
         )
         viewBinding.setup(this, viewModel)
-
-        if (viewModel.contributors.isEmpty()) {
-            // コントリビュータ一覧を更新する
-            viewModel.updateState()
-        }
     }
 
     override fun onDestroy() {

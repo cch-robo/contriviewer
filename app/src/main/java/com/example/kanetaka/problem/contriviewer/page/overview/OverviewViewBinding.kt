@@ -18,14 +18,6 @@ interface OverviewViewBindingNotifier {
     // ページ更新開始通知
     fun updatePage(viewModel: OverviewViewModel)
 
-    /*
-    // リフレッシュ終了通知
-    fun refreshStopped()
-
-    // リフレッシュエラー通知
-    fun refreshErrored()
-    */
-
     // ユーザへのメッセージ依頼通知
     fun showNotice(@StringRes messageId: Int)
 }
@@ -79,6 +71,7 @@ class OverviewViewBinding(
      * 不特定先からの状態更新通知(状態遷移先通知)への対応。
      */
     override fun updateState() {
+        debugLog("OverviewViewBinding  updateState, status=${viewModel.status}")
         when (viewModel.status) {
             OverviewViewModelStatus.INIT_REFRESH -> {
                 // コントリビュータ一覧更新開始（標準プログレス）
@@ -141,44 +134,27 @@ class OverviewViewBinding(
     }
 
     /**
-     * コントリビュータ一覧更新エラー通知（ViewModelには公開しない）
-     */
-    /*
-    override fun refreshErrored() {
-        // コントリビュータ一覧を表示不可にする
-        binding.overviewList.visibility = View.GONE
-
-        // コネクションエラー表示を表示可能にする
-        binding.overviewConnectionError.visibility = View.VISIBLE
-        debugLog("OverviewViewBinding  refreshErrored")
-    }
-    */
-
-    /**
      * コントリビュータ一覧更新通知（ViewModelには公開しない）
      */
     override fun updatePage(viewModel: OverviewViewModel) {
-        debugLog("OverviewViewBinding  updatePage(${viewModel.contributors.size})")
-
-        /*
-        // コントリビュータ一覧を表示可能にする
-        binding.overviewList.visibility = View.VISIBLE
-        */
+        debugLog("OverviewViewBinding  updatePage(${viewModel.contributors.size}), status=${viewModel.status}")
 
         // リストを更新
         contributorListAdapter.submitList(viewModel.contributors)
 
         if (viewModel.contributors.isEmpty()) {
             when (viewModel.status) {
-                OverviewViewModelStatus.INIT_REFRESH -> {
-                    binding.overviewList.visibility = View.GONE
-                    binding.overviewConnectionError.visibility = View.GONE
-                }
-                else -> {
-                    // REFRESH_FAILED もしくは、REFRESH_CONTRIBUTORS かつコントリビュータ一覧無し
+                OverviewViewModelStatus.REFRESH_FAILED -> {
                     binding.overviewList.visibility = View.GONE
                     binding.overviewConnectionError.visibility = View.VISIBLE
                     debugLog("OverviewViewBinding  refresh Error")
+                }
+                else -> {
+                    // INIT_REFRESH か SWIPE_REFRESH もしくは、REFRESH_CONTRIBUTORS かつコントリビュータ一覧無し（想定外）
+                    stopProgress()
+                    binding.overviewList.visibility = View.GONE
+                    binding.overviewConnectionError.visibility = View.VISIBLE
+                    debugLog("OverviewViewBinding  refresh Unexpected")
                 }
             }
         } else {

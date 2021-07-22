@@ -111,19 +111,6 @@ class OverviewViewModelUnitTest {
             OverviewViewModelStatus.REFRESH_CONTRIBUTORS,
             fakeViewBindingNotifier.viewModelStatus
         )
-        /*
-        // 各種通知への呼出順確認
-        assertEquals(3, fakeViewBindingNotifier.notifies.size)
-        assertEquals(Notify.SHOW_NOTICE, fakeViewBindingNotifier.notifies[0].first)
-        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
-        assertEquals(Notify.UPDATE_PAGE, fakeViewBindingNotifier.notifies[2].first)
-
-        // メッセージ確認
-        assertEquals(
-            R.string.contributors_overview_refresh_request,
-            fakeViewBindingNotifier.notifies[0].second
-        )
-        */
     }
 
     /**
@@ -165,24 +152,6 @@ class OverviewViewModelUnitTest {
             OverviewViewModelStatus.REFRESH_FAILED,
             fakeViewBindingNotifier.viewModelStatus
         )
-        /*
-        // 各種通知への呼出順確認
-        assertEquals(4, fakeViewBindingNotifier.notifies.size)
-        assertEquals(Notify.SHOW_NOTICE, fakeViewBindingNotifier.notifies[0].first)
-        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
-        assertEquals(Notify.SHOW_NOTICE, fakeViewBindingNotifier.notifies[2].first)
-        assertEquals(Notify.REFRESH_ERRORED, fakeViewBindingNotifier.notifies[3].first)
-
-        // メッセージ確認
-        assertEquals(
-            R.string.contributors_overview_refresh_request,
-            fakeViewBindingNotifier.notifies[0].second
-        )
-        assertEquals(
-            R.string.contributors_overview_refresh_error,
-            fakeViewBindingNotifier.notifies[2].second
-        )
-        */
     }
 }
 
@@ -219,13 +188,6 @@ private class FakeOverviewViewBindingNotifier : DestinationUnspecifiedStateChang
         _latch.await(10000, TimeUnit.MILLISECONDS)
     }
 
-    /*
-    // 各種通知への呼出順
-    private var _notifies: MutableList<Pair<Notify, Int>> = mutableListOf()
-    val notifies: List<Pair<Notify, Int>>
-        get() = _notifies
-    */
-
     // コントリビュータ一覧画面ステータス
     private lateinit var _viewModelStatus: OverviewViewModelStatus
     val viewModelStatus: OverviewViewModelStatus
@@ -250,7 +212,7 @@ private class FakeOverviewViewBindingNotifier : DestinationUnspecifiedStateChang
         debugTestLog("ViewBinding  updateState, status=${viewModelStatus}, contributors=${viewModel.contributors.size}")
 
         when (viewModelStatus) {
-            OverviewViewModelStatus.INIT_EMPTY -> {
+            OverviewViewModelStatus.INIT_REFRESH -> {
                 // コントリビュータ一覧更新要求を通知
             }
             OverviewViewModelStatus.REFRESH_CONTRIBUTORS -> {
@@ -261,46 +223,9 @@ private class FakeOverviewViewBindingNotifier : DestinationUnspecifiedStateChang
                 // コントリビュータ一覧更新失敗
                 _latch.countDown()
             }
-            else -> OverviewViewModelStatus.INIT_EMPTY
+            else -> OverviewViewModelStatus.INIT_REFRESH
         }
     }
-
-    /*
-    override fun updatePage(contributors: List<OverviewContributor>) {
-        debugTestLog("Called updatePage()")
-        _notifies.add(Pair(Notify.UPDATE_PAGE, 0))
-        _contributors.addAll(contributors)
-
-        // 成功時の完了待機解除
-        _latch.countDown()
-    }
-
-    override fun refreshStopped() {
-        debugTestLog("Called refreshStopped()")
-        _notifies.add(Pair(Notify.REFRESH_STOPPED, 0))
-    }
-
-    override fun refreshErrored() {
-        debugTestLog("Called refreshErrored()")
-        _notifies.add(Pair(Notify.REFRESH_ERRORED, 0))
-
-        // エラー時の完了待機解除
-        _latch.countDown()
-    }
-
-    override fun showNotice(messageId: Int) {
-        debugTestLog("Called showNotice()")
-        _notifies.add(Pair(Notify.SHOW_NOTICE, messageId))
-    }
-
-    // 通知種別
-    enum class Notify {
-        UPDATE_PAGE,
-        REFRESH_STOPPED,
-        REFRESH_ERRORED,
-        SHOW_NOTICE
-    }
-    */
 }
 
 /**
