@@ -24,10 +24,13 @@ import kotlinx.coroutines.withContext
 
 
 /**
- * ViewModel用の内部通知インターフェース。（外部公開しない）
+ * ViewModel用の内部通知インターフェース。（ViewBindingに公開する）
  * ViewBinding から ViewModel への更新通知に対応するインターフェースを提供します。
  */
-private interface OverviewViewModelNotifier {
+interface OverviewViewModelNotifier {
+    // スワイプによるコントリビュータ一覧リフレッシュ開始通知
+    fun swipeRefreshContributors()
+
     // コントリビュータ一覧リフレッシュ開始通知
     fun refreshContributors()
 }
@@ -37,7 +40,8 @@ private interface OverviewViewModelNotifier {
  * ViewModel用のコントリビュータ一覧画面ステータス
  */
 enum class OverviewViewModelStatus {
-    INIT_EMPTY,
+    INIT_REFRESH,
+    SWIPE_REFRESH,
     REFRESH_CONTRIBUTORS,
     REFRESH_FAILED;
 }
@@ -69,7 +73,7 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier,
 
     // カレント・コントリビュータ一覧画面ステータス
     private var _status =
-        MutableLiveData<OverviewViewModelStatus>(OverviewViewModelStatus.INIT_EMPTY)
+        MutableLiveData<OverviewViewModelStatus>(OverviewViewModelStatus.INIT_REFRESH)
 
     /*
     private val status : LiveData<ViewModelStatus>
@@ -111,7 +115,15 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier,
     }
 
     /**
-     * コントリビュータ情報をリフレシュする。（外部公開しない）
+     * スワイプによりコントリビュータ情報をリフレシュする。（ViewBindingに公開する)
+     */
+    override fun swipeRefreshContributors() {
+        _status.value = OverviewViewModelStatus.SWIPE_REFRESH
+        refreshContributors()
+    }
+
+    /**
+     * コントリビュータ情報をリフレシュする。（ViewBindingに公開する)
      */
     override fun refreshContributors() {
         // IOスレッドでサーバからコントリビュータ情報を取得する
