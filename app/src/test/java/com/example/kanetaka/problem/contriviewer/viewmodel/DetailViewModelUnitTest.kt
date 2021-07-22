@@ -4,9 +4,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-/*
-import com.example.kanetaka.problem.contriviewer.R
-*/
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
 import com.example.kanetaka.problem.contriviewer.page.DestinationUnspecifiedStateChangeNotifier
@@ -112,14 +109,6 @@ class DetailViewModelUnitTest {
             DetailViewModelStatus.REFRESH_CONTRIBUTOR,
             fakeViewBindingNotifier.viewModelStatus
         )
-        /*
-        // 各種通知への呼出順確認
-        assertEquals(3, fakeViewBindingNotifier.notifies.size)
-        assertEquals(Notify.REFRESH_START, fakeViewBindingNotifier.notifies[0].first)
-        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
-        assertEquals(Notify.UPDATE_PAGE, fakeViewBindingNotifier.notifies[2].first)
-        fakeViewBindingNotifier.notifies
-        */
     }
 
     /**
@@ -159,20 +148,6 @@ class DetailViewModelUnitTest {
 
         // コントリビュータ詳細状態確認
         assertEquals(DetailViewModelStatus.REFRESH_FAILED, fakeViewBindingNotifier.viewModelStatus)
-        /*
-        // 各種通知への呼出順確認
-        assertEquals(4, fakeViewBindingNotifier.notifies.size)
-        assertEquals(Notify.REFRESH_START, fakeViewBindingNotifier.notifies[0].first)
-        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
-        assertEquals(Notify.UPDATE_PAGE, fakeViewBindingNotifier.notifies[2].first)
-        assertEquals(Notify.SHOW_NOTICE, fakeViewBindingNotifier.notifies[3].first)
-
-        // メッセージ確認
-        assertEquals(
-            R.string.contributor_detail_refresh_error,
-            fakeViewBindingNotifier.notifies[3].second
-        )
-        */
     }
 }
 
@@ -209,13 +184,6 @@ private class FakeDetailViewBindingNotifier : DestinationUnspecifiedStateChangeN
         _latch.await(10000, TimeUnit.MILLISECONDS)
     }
 
-    /*
-    // 各種通知への呼出順
-    private var _notifies: MutableList<Pair<Notify, Int>> = mutableListOf()
-    val notifies: List<Pair<Notify, Int>>
-        get() = _notifies
-    */
-
     // コントリビュータ詳細画面ステータス
     private lateinit var _viewModelStatus: DetailViewModelStatus
     val viewModelStatus: DetailViewModelStatus
@@ -248,43 +216,9 @@ private class FakeDetailViewBindingNotifier : DestinationUnspecifiedStateChangeN
                 // コントリビュータ詳細更新失敗
                 _latch.countDown()
             }
-            else -> OverviewViewModelStatus.INIT_EMPTY
+            else -> OverviewViewModelStatus.INIT_REFRESH
         }
     }
-
-    /*
-    override fun updatePage(contributor: DetailContributor?) {
-        debugTestLog("Called updatePage()")
-        _notifies.add(Pair(Notify.UPDATE_PAGE, 0))
-        _contributor = contributor
-
-        // 成功時/エラー時の完了待機解除
-        _latch.countDown()
-    }
-
-    override fun refreshStart() {
-        debugTestLog("Called refreshStart()")
-        _notifies.add(Pair(Notify.REFRESH_START, 0))
-    }
-
-    override fun refreshStopped() {
-        debugTestLog("Called refreshStopped()")
-        _notifies.add(Pair(Notify.REFRESH_STOPPED, 0))
-    }
-
-    override fun showNotice(messageId: Int) {
-        debugTestLog("Called showNotice()")
-        _notifies.add(Pair(Notify.SHOW_NOTICE, messageId))
-    }
-
-    // 通知種別
-    enum class Notify {
-        UPDATE_PAGE,
-        REFRESH_START,
-        REFRESH_STOPPED,
-        SHOW_NOTICE
-    }
-    */
 }
 
 /**

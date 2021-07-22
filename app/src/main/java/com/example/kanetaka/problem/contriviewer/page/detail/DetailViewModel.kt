@@ -1,13 +1,5 @@
 package com.example.kanetaka.problem.contriviewer.page.detail
 
-/*
-import com.example.kanetaka.problem.contriviewer.R
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-*/
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -77,13 +69,6 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier,
 
         _login = login
 
-        /*
-        // コントリビュータ一覧更新通知
-        _contributorObserver.observe(viewLifecycleOwner, {
-            _notify.updateState()
-        })
-        */
-
         // コントリビュータ一覧画面ステータス・オブサーバー
         _status.observe(viewLifecycleOwner, Observer {
             status = it
@@ -95,6 +80,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier,
      * 不特定先からの状態更新通知への対応。
      */
     override fun updateState() {
+        debugLog("DetailViewModel  updateState, status=${status}")
         refreshContributor()
     }
 

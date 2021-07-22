@@ -82,7 +82,7 @@ class DetailViewBinding(
      * コントリビュータ詳細更新通知（ViewModelには公開しない）
      */
     override fun updatePage(viewModel: DetailViewModel) {
-        debugLog("DetailViewBinding  updatePage(${viewModel.contributor?.login})")
+        debugLog("DetailViewBinding  updatePage(${viewModel.contributor?.login}), state=${viewModel.status}")
         if (viewModel.contributor == null) {
             when (viewModel.status) {
                 DetailViewModelStatus.INIT_EMPTY -> {
