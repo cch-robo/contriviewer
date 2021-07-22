@@ -205,7 +205,7 @@ private class FakeDetailViewBindingNotifier : DestinationUnspecifiedStateChangeN
         debugTestLog("ViewBinding  updateState, status=${viewModelStatus}, contributors=${viewModel.contributor}")
 
         when (viewModelStatus) {
-            DetailViewModelStatus.INIT_EMPTY -> {
+            DetailViewModelStatus.INIT_REFRESH -> {
                 // コントリビュータ詳細更新要求を通知
             }
             DetailViewModelStatus.REFRESH_CONTRIBUTOR -> {
