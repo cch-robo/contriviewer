@@ -12,7 +12,7 @@ import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
 /**
  * ViewBinding用の通知インターフェース。（ViewModelには公開しない）
- * ViewModel から View への通知インターフェースを提供します。
+ * View への通知インターフェースを提供します。
  */
 interface DetailViewBindingNotifier {
     // ページ更新開始通知
@@ -86,32 +86,32 @@ class DetailViewBinding(
         if (viewModel.contributor == null) {
             when (viewModel.status) {
                 DetailViewModelStatus.INIT_REFRESH -> {
-                    updatePageStyle(true, false, false)
+                    updatePageStyle(DetailViewModelStatus.INIT_REFRESH)
                 }
                 DetailViewModelStatus.REFRESH_FAILED -> {
-                    updatePageStyle(false, false, true)
+                    updatePageStyle(DetailViewModelStatus.REFRESH_FAILED)
                     debugLog("DetailViewBinding  refresh Error")
                 }
                 else -> {
                     // REFRESH_CONTRIBUTOR かつコントリビュータ無し
-                    updatePageStyle(false, false, true)
+                    updatePageStyle(DetailViewModelStatus.REFRESH_FAILED)
                     debugLog("DetailViewBinding  refresh Unexpected")
                 }
             }
         } else {
             if (viewModel.status == DetailViewModelStatus.REFRESH_CONTRIBUTOR) {
-                updatePageStyle(false, true, false)
+                updatePageStyle(DetailViewModelStatus.REFRESH_CONTRIBUTOR)
 
                 // contributor コンディションは、not null が保証されている。
-                updatePage(viewModel.contributor!!)
+                updatePageContents(viewModel.contributor!!)
             }
         }
     }
 
     /**
-     * コントリビュータ詳細更新
+     * コントリビュータ詳細画面表示コンテンツ更新
      */
-    private fun updatePage(contributor: DetailContributor) {
+    private fun updatePageContents(contributor: DetailContributor) {
         Glide.with(binding.root.context)
             .load(contributor.iconUrl)
             .placeholder(R.drawable.loading_animation)
@@ -196,6 +196,14 @@ class DetailViewBinding(
     /**
      * コントリビュータ詳細画面表示スタイル更新
      */
+    private fun updatePageStyle(status : DetailViewModelStatus) {
+        when(status) {
+            DetailViewModelStatus.INIT_REFRESH -> updatePageStyle(true, false, false)
+            DetailViewModelStatus.REFRESH_CONTRIBUTOR-> updatePageStyle(false, true, false)
+            DetailViewModelStatus.REFRESH_FAILED -> updatePageStyle(false, false, true)
+        }
+    }
+
     private fun updatePageStyle(
         isShowProgress: Boolean,
         isShowContents: Boolean,

@@ -12,9 +12,15 @@ import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
 /**
  * ViewBinding用の通知インターフェース。（ViewModelには公開しない）
- * ViewModel から View への更新通知に対応するインターフェースを提供します。
+ * View への通知インターフェースを提供します。
  */
 interface OverviewViewBindingNotifier {
+    // ページ更新（プログレス）開始通知
+    fun startProgress(status: OverviewViewModelStatus)
+
+    // ページ更新（プログレス）終了通知
+    fun stopProgress()
+
     // ページ更新開始通知
     fun updatePage(viewModel: OverviewViewModel)
 
@@ -99,16 +105,16 @@ class OverviewViewBinding(
     /**
      * コントリビュータ一覧更新プログレス開始通知（ViewModelには公開しない）
      */
-    private fun startProgress(status: OverviewViewModelStatus) {
+    override fun startProgress(status: OverviewViewModelStatus) {
         debugLog("OverviewViewBinding  refreshStart")
         when (status) {
             OverviewViewModelStatus.INIT_REFRESH -> {
                 // プログレスを表示する
-                updatePageStyle(true, false, false)
+                updatePageStyle(OverviewViewModelStatus.INIT_REFRESH)
             }
             OverviewViewModelStatus.SWIPE_REFRESH -> {
                 // SwipeRefreshLayout のプログレスを利用する
-                updatePageStyle(false, false, false)
+                updatePageStyle(OverviewViewModelStatus.SWIPE_REFRESH)
             }
             else -> return
         }
@@ -120,10 +126,10 @@ class OverviewViewBinding(
     /**
      * コントリビュータ一覧更新プログレス完了通知（ViewModelには公開しない）
      */
-    private fun stopProgress() {
+    override fun stopProgress() {
         debugLog("OverviewViewBinding  refreshStopped")
-        // プログレス表示を終了する
-        updatePageStyle(false, false, false)
+        // プログレス表示を終了する （プログレスのないスワイプ表示にしてから、回転を止める）
+        updatePageStyle(OverviewViewModelStatus.SWIPE_REFRESH)
 
         // Swipe プログレスの回転を止める。
         binding.overviewSwipe.isRefreshing = false
@@ -135,28 +141,29 @@ class OverviewViewBinding(
     override fun updatePage(viewModel: OverviewViewModel) {
         debugLog("OverviewViewBinding  updatePage(${viewModel.contributors.size}), status=${viewModel.status}")
 
-        // リストを更新
-        contributorListAdapter.submitList(viewModel.contributors)
 
         if (viewModel.contributors.isEmpty()) {
             when (viewModel.status) {
                 OverviewViewModelStatus.REFRESH_FAILED -> {
-                    updatePageStyle(false, false, true)
+                    updatePageStyle(OverviewViewModelStatus.REFRESH_FAILED)
                     debugLog("OverviewViewBinding  refresh Error")
                 }
                 else -> {
                     // INIT_REFRESH か SWIPE_REFRESH もしくは、REFRESH_CONTRIBUTORS かつコントリビュータ一覧無し（想定外）
                     stopProgress()
-                    updatePageStyle(false, false, true)
+                    updatePageStyle(OverviewViewModelStatus.REFRESH_FAILED)
                     debugLog("OverviewViewBinding  refresh Unexpected")
                 }
             }
         } else {
             if (viewModel.status == OverviewViewModelStatus.REFRESH_CONTRIBUTORS) {
                 // コントリビュータ一覧を表示可能にする
-                updatePageStyle(false, true, false)
+                updatePageStyle(OverviewViewModelStatus.REFRESH_CONTRIBUTORS)
             }
         }
+
+        // コントリビュータ一覧画面表示コンテンツ更新
+        updatePageContents(viewModel.contributors)
     }
 
     /**
@@ -169,8 +176,25 @@ class OverviewViewBinding(
     }
 
     /**
+     * コントリビュータ一覧画面表示コンテンツ更新
+     */
+    private fun updatePageContents(contributors: List<OverviewContributor>) {
+        // コントリビュータ一覧画面表示コンテンツ（リスト）更新
+        contributorListAdapter.submitList(contributors)
+    }
+
+    /**
      * コントリビュータ一覧画面表示スタイル更新
      */
+    private fun updatePageStyle(status: OverviewViewModelStatus) {
+        when(status) {
+            OverviewViewModelStatus.INIT_REFRESH -> updatePageStyle(true, false, false)
+            OverviewViewModelStatus.SWIPE_REFRESH -> updatePageStyle(false, false, false)
+            OverviewViewModelStatus.REFRESH_CONTRIBUTORS -> updatePageStyle(false, true, false)
+            OverviewViewModelStatus.REFRESH_FAILED -> updatePageStyle(false, false, true)
+        }
+    }
+
     private fun updatePageStyle(
         isShowProgress: Boolean,
         isShowContents: Boolean,
