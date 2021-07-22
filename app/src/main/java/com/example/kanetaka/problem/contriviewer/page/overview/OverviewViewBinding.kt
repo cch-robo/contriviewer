@@ -16,13 +16,15 @@ import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
  */
 interface OverviewViewBindingNotifier {
     // ページ更新開始通知
-    fun updatePage(contributors: List<OverviewContributor>)
+    fun updatePage(viewModel: OverviewViewModel)
 
+    /*
     // リフレッシュ終了通知
     fun refreshStopped()
 
     // リフレッシュエラー通知
     fun refreshErrored()
+    */
 
     // ユーザへのメッセージ依頼通知
     fun showNotice(@StringRes messageId: Int)
@@ -42,8 +44,8 @@ class OverviewViewBinding(
     private val viewModel: OverviewViewModel
         get() = _viewModel
 
-    private lateinit var _notify: DestinationUnspecifiedStateChangeNotifier
-    private val notify: DestinationUnspecifiedStateChangeNotifier
+    private lateinit var _notify: OverviewViewModelNotifier
+    private val notify: OverviewViewModelNotifier
         get() = _notify
 
     private lateinit var contributorListAdapter: OverviewContributorsAdapter
@@ -68,7 +70,7 @@ class OverviewViewBinding(
 
         // スワイプによるコントリビュータ一覧の更新
         binding.overviewSwipe.setOnRefreshListener {
-            refreshStart()
+            notify.swipeRefreshContributors()
         }
         debugLog("OverviewViewBinding  setup end")
     }
@@ -78,48 +80,70 @@ class OverviewViewBinding(
      */
     override fun updateState() {
         when (viewModel.status) {
-            OverviewViewModelStatus.INIT_EMPTY -> {
-                // コントリビュータ一覧更新要求を通知
+            OverviewViewModelStatus.INIT_REFRESH -> {
+                // コントリビュータ一覧更新開始（標準プログレス）
+                startProgress(viewModel.status)
                 showNotice(R.string.contributors_overview_refresh_request)
+            }
+            OverviewViewModelStatus.SWIPE_REFRESH -> {
+                // コントリビュータ一覧更新開始（スワイププログレス）
+                startProgress(viewModel.status)
             }
             OverviewViewModelStatus.REFRESH_CONTRIBUTORS -> {
                 // コントリビュータ一覧更新成功
-                refreshStopped() // ViewBinding にリフレッシュが終了したことを通知
-                updatePage(viewModel.contributors)
+                stopProgress()
+                updatePage(viewModel)
             }
             OverviewViewModelStatus.REFRESH_FAILED -> {
                 // コントリビュータ一覧更新失敗
-                refreshStopped() // ViewBinding にリフレッシュが終了したことを通知
+                stopProgress()
                 showNotice(R.string.contributors_overview_refresh_error)
-                refreshErrored()
+                updatePage(viewModel)
             }
         }
     }
 
     /**
-     * コントリビュータ一覧更新開始通知（ViewModelには公開しない）
+     * コントリビュータ一覧更新プログレス開始通知（ViewModelには公開しない）
      */
-    private fun refreshStart() {
+    private fun startProgress(status: OverviewViewModelStatus) {
         debugLog("OverviewViewBinding  refreshStart")
-        // コネクションエラー表示を消去
-        binding.overviewConnectionError.visibility = View.GONE
+        when (status) {
+            OverviewViewModelStatus.INIT_REFRESH -> {
+                // プログレスを表示する
+                binding.overviewProgress.visibility = View.VISIBLE
+                binding.overviewList.visibility = View.GONE
+                binding.overviewConnectionError.visibility = View.GONE
+            }
+            OverviewViewModelStatus.SWIPE_REFRESH -> {
+                // SwipeRefreshLayout のプログレスを利用する
+                binding.overviewProgress.visibility = View.GONE
+                binding.overviewList.visibility = View.GONE
+                binding.overviewConnectionError.visibility = View.GONE
+            }
+            else -> return
+        }
 
-        // Swipe によりプログレスが回りだしたので、コントリビュータ一覧の状態を更新する。
-        notify.updateState()
+        // コントリビュータ一覧の状態を更新する。
+        notify.refreshContributors()
     }
 
     /**
-     * コントリビュータ一覧更新完了通知（ViewModelには公開しない）
+     * コントリビュータ一覧更新プログレス完了通知（ViewModelには公開しない）
      */
-    override fun refreshStopped() {
-        // Swipe によりプログレスが回っているので、リフレッシュプログレスの回転を止める。
-        binding.overviewSwipe.isRefreshing = false
+    private fun stopProgress() {
         debugLog("OverviewViewBinding  refreshStopped")
+        // プログレス表示を終了する
+        binding.overviewProgress.visibility = View.GONE
+
+        // Swipe プログレスの回転を止める。
+        binding.overviewSwipe.isRefreshing = false
     }
 
     /**
      * コントリビュータ一覧更新エラー通知（ViewModelには公開しない）
      */
+    /*
     override fun refreshErrored() {
         // コントリビュータ一覧を表示不可にする
         binding.overviewList.visibility = View.GONE
@@ -128,18 +152,42 @@ class OverviewViewBinding(
         binding.overviewConnectionError.visibility = View.VISIBLE
         debugLog("OverviewViewBinding  refreshErrored")
     }
+    */
 
     /**
      * コントリビュータ一覧更新通知（ViewModelには公開しない）
      */
-    override fun updatePage(contributors: List<OverviewContributor>) {
-        debugLog("OverviewViewBinding  updatePage(${contributors.size})")
+    override fun updatePage(viewModel: OverviewViewModel) {
+        debugLog("OverviewViewBinding  updatePage(${viewModel.contributors.size})")
 
+        /*
         // コントリビュータ一覧を表示可能にする
         binding.overviewList.visibility = View.VISIBLE
+        */
 
         // リストを更新
-        contributorListAdapter.submitList(contributors)
+        contributorListAdapter.submitList(viewModel.contributors)
+
+        if (viewModel.contributors.isEmpty()) {
+            when (viewModel.status) {
+                OverviewViewModelStatus.INIT_REFRESH -> {
+                    binding.overviewList.visibility = View.GONE
+                    binding.overviewConnectionError.visibility = View.GONE
+                }
+                else -> {
+                    // REFRESH_FAILED もしくは、REFRESH_CONTRIBUTORS かつコントリビュータ一覧無し
+                    binding.overviewList.visibility = View.GONE
+                    binding.overviewConnectionError.visibility = View.VISIBLE
+                    debugLog("OverviewViewBinding  refresh Error")
+                }
+            }
+        } else {
+            if (viewModel.status == OverviewViewModelStatus.REFRESH_CONTRIBUTORS) {
+                // コントリビュータ一覧を表示可能にする
+                binding.overviewList.visibility = View.VISIBLE
+                binding.overviewConnectionError.visibility = View.GONE
+            }
+        }
     }
 
     /**
