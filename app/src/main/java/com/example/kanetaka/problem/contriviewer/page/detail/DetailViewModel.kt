@@ -27,7 +27,7 @@ private interface DetailViewModelNotifier {
  * ViewModel用のコントリビュータ詳細画面ステータス
  */
 enum class DetailViewModelStatus {
-    INIT_EMPTY,
+    INIT_REFRESH,
     REFRESH_CONTRIBUTOR,
     REFRESH_FAILED;
 }
@@ -55,7 +55,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier,
         get() = _contributorObserver
 
     // カレント・コントリビュータ一覧画面ステータス
-    private var _status = MutableLiveData(DetailViewModelStatus.INIT_EMPTY)
+    private var _status = MutableLiveData(DetailViewModelStatus.INIT_REFRESH)
     lateinit var status: DetailViewModelStatus
 
     fun setup(

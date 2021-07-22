@@ -53,7 +53,7 @@ class DetailViewBinding(
     override fun updateState() {
         debugLog("DetailViewBinding  updateState, state=${viewModel.status}")
         when (viewModel.status) {
-            DetailViewModelStatus.INIT_EMPTY -> {
+            DetailViewModelStatus.INIT_REFRESH -> {
                 // コントリビュータ詳細初期表示
                 updatePage(viewModel)
             }
@@ -85,16 +85,23 @@ class DetailViewBinding(
         debugLog("DetailViewBinding  updatePage(${viewModel.contributor?.login}), state=${viewModel.status}")
         if (viewModel.contributor == null) {
             when (viewModel.status) {
-                DetailViewModelStatus.INIT_EMPTY -> {
+                DetailViewModelStatus.INIT_REFRESH -> {
                     binding.contributorContents.visibility = View.GONE
                     binding.detailProgress.visibility = View.VISIBLE
                     binding.detailConnectionError.visibility = View.GONE
                 }
-                else -> {
-                    // REFRESH_FAILED もしくは、REFRESH_CONTRIBUTOR かつコントリビュータ無し
+                DetailViewModelStatus.REFRESH_FAILED -> {
                     binding.contributorContents.visibility = View.GONE
                     binding.detailProgress.visibility = View.GONE
                     binding.detailConnectionError.visibility = View.VISIBLE
+                    debugLog("DetailViewBinding  refresh Error")
+                }
+                else -> {
+                    // REFRESH_CONTRIBUTOR かつコントリビュータ無し
+                    binding.contributorContents.visibility = View.GONE
+                    binding.detailProgress.visibility = View.GONE
+                    binding.detailConnectionError.visibility = View.VISIBLE
+                    debugLog("DetailViewBinding  refresh Unexpected")
                 }
             }
         } else {
