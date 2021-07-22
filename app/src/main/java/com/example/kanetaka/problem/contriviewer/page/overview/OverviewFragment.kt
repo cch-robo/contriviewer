@@ -15,7 +15,7 @@ class OverviewFragment : Fragment() {
 
     // viewBinding は、_viewBinding 初期化後にしか参照されない。
     private var _viewBinding: OverviewViewBinding? = null
-    private val viewBinding get() = _viewBinding!!
+    val viewBinding get() = _viewBinding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,9 +37,9 @@ class OverviewFragment : Fragment() {
         )
         viewBinding.setup(this, viewModel)
 
-        if (viewModel.contributors == null || viewModel.contributors!!.isEmpty()) {
+        if (viewModel.contributors.isEmpty()) {
             // コントリビュータ一覧を更新する
-            viewModel.refreshContributors()
+            viewModel.updateState()
         }
     }
 

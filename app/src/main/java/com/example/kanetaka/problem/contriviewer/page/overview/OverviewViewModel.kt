@@ -1,11 +1,17 @@
 package com.example.kanetaka.problem.contriviewer.page.overview
 
+/*
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kanetaka.problem.contriviewer.R
+*/
+import androidx.lifecycle.*
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
+import com.example.kanetaka.problem.contriviewer.page.DestinationUnspecifiedStateChangeNotifier
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 import kotlinx.coroutines.Dispatchers
@@ -14,42 +20,70 @@ import kotlinx.coroutines.withContext
 
 
 /**
- * ViewModel用の通知インターフェース。
- * ViewBinding から ViewModel への通知インターフェースを提供します。
+ * ViewModel用の内部通知インターフェース。（外部公開しない）
+ * ViewBinding から ViewModel への更新通知に対応するインターフェースを提供します。
  */
-interface OverviewViewModelNotifier {
+private interface OverviewViewModelNotifier {
     // コントリビュータ一覧リフレッシュ開始通知
     fun refreshContributors()
 }
 
 /**
+ * ViewModel用のステータス。
+ * ViewModel用のコントリビュータ一覧画面ステータス
+ */
+enum class OverviewViewModelStatus {
+    INIT_EMPTY,
+    REFRESH_CONTRIBUTORS,
+    REFRESH_FAILED;
+}
+
+/**
  * ViewModel として View の状態値を管理する
  */
-class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
+class OverviewViewModel : ViewModel(), OverviewViewModelNotifier,
+    DestinationUnspecifiedStateChangeNotifier {
     private lateinit var _repo: ContriViewerRepository
     private val repo: ContriViewerRepository
         get() = _repo
 
-    private lateinit var _notify: OverviewViewBindingNotifier
-    private val notify: OverviewViewBindingNotifier
+    private lateinit var _notify: DestinationUnspecifiedStateChangeNotifier
+    private val notify: DestinationUnspecifiedStateChangeNotifier
         get() = _notify
 
+    /*
     // コントリビュータ一覧
     private val _contributors = mutableListOf<OverviewContributor>()
     private var _contributorsObserver = MutableLiveData<MutableList<OverviewContributor>>()
     val contributors: MutableList<OverviewContributor>?
         get() = _contributorsObserver.value
+    */
+    // コントリビュータ一覧
+    private val _contributors = mutableListOf<OverviewContributor>()
+    val contributors: MutableList<OverviewContributor>
+        get() = _contributors
+
+    // カレント・コントリビュータ一覧画面ステータス
+    private var _status =
+        MutableLiveData<OverviewViewModelStatus>(OverviewViewModelStatus.INIT_EMPTY)
+
+    /*
+    private val status : LiveData<ViewModelStatus>
+        get() = _status
+    */
+    lateinit var status: OverviewViewModelStatus
 
     fun setup(
         viewLifecycleOwner: LifecycleOwner,
-        viewBindingNotifier: OverviewViewBindingNotifier,
+        viewBindingNotifier: DestinationUnspecifiedStateChangeNotifier,
         repo: ContriViewerRepository
     ) {
         _notify = viewBindingNotifier
         _repo = repo
 
+        /*
         // コントリビュータ一覧更新通知
-        _contributorsObserver.observe(viewLifecycleOwner, {
+        _contributorsObserver.observe(viewLifecycleOwner, Observer {
             _notify.updatePage(it)
         })
 
@@ -57,10 +91,23 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
         if (_contributors.isEmpty()) {
             notify.showNotice(R.string.contributors_overview_refresh_request)
         }
+        */
+        // コントリビュータ一覧画面ステータス・オブサーバー
+        _status.observe(viewLifecycleOwner, Observer {
+            status = it
+            notify.updateState()
+        })
     }
 
     /**
-     * コントリビュータ情報をリフレシュする。
+     * 不特定先からの状態更新通知への対応。
+     */
+    override fun updateState() {
+        refreshContributors()
+    }
+
+    /**
+     * コントリビュータ情報をリフレシュする。（外部公開しない）
      */
     override fun refreshContributors() {
         // IOスレッドでサーバからコントリビュータ情報を取得する
@@ -72,8 +119,10 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
 
             // 上記処理が完了してから、メインスレッドで実行されます。
             withContext(Dispatchers.Main) {
+                /*
                 // ViewBinding にリフレッシュが終了したことを通知
                 notify.refreshStopped()
+                */
 
                 if (result.isSuccess && result.getOrNull() != null) {
                     result.getOrNull()!!.forEach { model: OverviewModel ->
@@ -92,11 +141,19 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier {
                     // コントリビュータ一覧更新
                     _contributors.clear()
                     _contributors.addAll(results)
+                    /*
                     _contributorsObserver.value = _contributors
+                    */
+                    _status.value = OverviewViewModelStatus.REFRESH_CONTRIBUTORS
 
                 } else {
+                    /*
                     notify.showNotice(R.string.contributors_overview_refresh_error)
                     notify.refreshErrored()
+                    */
+                    // コントリビュータ一覧更新
+                    _contributors.clear()
+                    _status.value = OverviewViewModelStatus.REFRESH_FAILED
                     debugLog("refreshContributors failed")
                 }
                 debugLog("refreshContributors  refresh END!!")
