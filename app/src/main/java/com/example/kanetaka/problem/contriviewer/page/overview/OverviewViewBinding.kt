@@ -81,8 +81,14 @@ class OverviewViewBinding(
         when (viewModel.status) {
             OverviewViewModelStatus.INIT_REFRESH -> {
                 // コントリビュータ一覧更新開始（標準プログレス）
-                startProgress(viewModel.status)
-                showNotice(R.string.contributors_overview_refresh_request)
+                // Activity#onResume のタイミングで実行されるよう遅延を設定しています。
+                // INIT_REFRESH が呼ばれるタイミングは、Activity#onCreate() 直後のため
+                // プログレス表示設定をしてもタイミングが早すぎて動作しません。
+                // このため onResume() タイミングでプログレス表示されるよう調整します。
+                root.postDelayed({
+                    startProgress(viewModel.status)
+                    showNotice(R.string.contributors_overview_refresh_request)
+                },500)
             }
             OverviewViewModelStatus.SWIPE_REFRESH -> {
                 // コントリビュータ一覧更新開始（スワイププログレス）
