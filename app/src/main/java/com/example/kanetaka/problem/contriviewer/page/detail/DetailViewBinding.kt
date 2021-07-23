@@ -86,21 +86,21 @@ class DetailViewBinding(
         if (viewModel.contributor == null) {
             when (viewModel.status) {
                 DetailViewModelStatus.INIT_REFRESH -> {
-                    updatePageStyle(DetailViewModelStatus.INIT_REFRESH)
+                    updatePageMode(DetailViewModelStatus.INIT_REFRESH)
                 }
                 DetailViewModelStatus.REFRESH_FAILED -> {
-                    updatePageStyle(DetailViewModelStatus.REFRESH_FAILED)
+                    updatePageMode(DetailViewModelStatus.REFRESH_FAILED)
                     debugLog("DetailViewBinding  refresh Error")
                 }
                 else -> {
                     // REFRESH_CONTRIBUTOR かつコントリビュータ無し
-                    updatePageStyle(DetailViewModelStatus.REFRESH_FAILED)
+                    updatePageMode(DetailViewModelStatus.REFRESH_FAILED)
                     debugLog("DetailViewBinding  refresh Unexpected")
                 }
             }
         } else {
             if (viewModel.status == DetailViewModelStatus.REFRESH_CONTRIBUTOR) {
-                updatePageStyle(DetailViewModelStatus.REFRESH_CONTRIBUTOR)
+                updatePageMode(DetailViewModelStatus.REFRESH_CONTRIBUTOR)
 
                 // contributor コンディションは、not null が保証されている。
                 updatePageContents(viewModel.contributor!!)
@@ -194,17 +194,26 @@ class DetailViewBinding(
     }
 
     /**
-     * コントリビュータ詳細画面表示スタイル更新
+     * コントリビュータ詳細画面表示モード更新
      */
-    private fun updatePageStyle(status : DetailViewModelStatus) {
+    private fun updatePageMode(status : DetailViewModelStatus) {
         when(status) {
-            DetailViewModelStatus.INIT_REFRESH -> updatePageStyle(true, false, false)
-            DetailViewModelStatus.REFRESH_CONTRIBUTOR-> updatePageStyle(false, true, false)
-            DetailViewModelStatus.REFRESH_FAILED -> updatePageStyle(false, false, true)
+            DetailViewModelStatus.INIT_REFRESH -> {
+                // 初期表示（空白画面）
+                updatePageMode(true, false, false)
+            }
+            DetailViewModelStatus.REFRESH_CONTRIBUTOR -> {
+                // コントリビュータ詳細表示
+                updatePageMode(false, true, false)
+            }
+            DetailViewModelStatus.REFRESH_FAILED -> {
+                // エラー表示（雲アイコンにスラッシュ）
+                updatePageMode(false, false, true)
+            }
         }
     }
 
-    private fun updatePageStyle(
+    private fun updatePageMode(
         isShowProgress: Boolean,
         isShowContents: Boolean,
         isShowError: Boolean

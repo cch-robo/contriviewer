@@ -110,11 +110,11 @@ class OverviewViewBinding(
         when (status) {
             OverviewViewModelStatus.INIT_REFRESH -> {
                 // プログレスを表示する
-                updatePageStyle(OverviewViewModelStatus.INIT_REFRESH)
+                updatePageMode(OverviewViewModelStatus.INIT_REFRESH)
             }
             OverviewViewModelStatus.SWIPE_REFRESH -> {
                 // SwipeRefreshLayout のプログレスを利用する
-                updatePageStyle(OverviewViewModelStatus.SWIPE_REFRESH)
+                updatePageMode(OverviewViewModelStatus.SWIPE_REFRESH)
             }
             else -> return
         }
@@ -129,7 +129,7 @@ class OverviewViewBinding(
     override fun stopProgress() {
         debugLog("OverviewViewBinding  refreshStopped")
         // プログレス表示を終了する （プログレスのないスワイプ表示にしてから、回転を止める）
-        updatePageStyle(OverviewViewModelStatus.SWIPE_REFRESH)
+        updatePageMode(OverviewViewModelStatus.SWIPE_REFRESH)
 
         // Swipe プログレスの回転を止める。
         binding.overviewSwipe.isRefreshing = false
@@ -141,24 +141,23 @@ class OverviewViewBinding(
     override fun updatePage(viewModel: OverviewViewModel) {
         debugLog("OverviewViewBinding  updatePage(${viewModel.contributors.size}), status=${viewModel.status}")
 
-
         if (viewModel.contributors.isEmpty()) {
             when (viewModel.status) {
                 OverviewViewModelStatus.REFRESH_FAILED -> {
-                    updatePageStyle(OverviewViewModelStatus.REFRESH_FAILED)
+                    updatePageMode(OverviewViewModelStatus.REFRESH_FAILED)
                     debugLog("OverviewViewBinding  refresh Error")
                 }
                 else -> {
                     // INIT_REFRESH か SWIPE_REFRESH もしくは、REFRESH_CONTRIBUTORS かつコントリビュータ一覧無し（想定外）
                     stopProgress()
-                    updatePageStyle(OverviewViewModelStatus.REFRESH_FAILED)
+                    updatePageMode(OverviewViewModelStatus.REFRESH_FAILED)
                     debugLog("OverviewViewBinding  refresh Unexpected")
                 }
             }
         } else {
             if (viewModel.status == OverviewViewModelStatus.REFRESH_CONTRIBUTORS) {
                 // コントリビュータ一覧を表示可能にする
-                updatePageStyle(OverviewViewModelStatus.REFRESH_CONTRIBUTORS)
+                updatePageMode(OverviewViewModelStatus.REFRESH_CONTRIBUTORS)
             }
         }
 
@@ -184,18 +183,34 @@ class OverviewViewBinding(
     }
 
     /**
-     * コントリビュータ一覧画面表示スタイル更新
+     * コントリビュータ一覧画面表示モード更新
      */
-    private fun updatePageStyle(status: OverviewViewModelStatus) {
+    private fun updatePageMode(status: OverviewViewModelStatus) {
         when(status) {
-            OverviewViewModelStatus.INIT_REFRESH -> updatePageStyle(true, false, false)
-            OverviewViewModelStatus.SWIPE_REFRESH -> updatePageStyle(false, false, false)
-            OverviewViewModelStatus.REFRESH_CONTRIBUTORS -> updatePageStyle(false, true, false)
-            OverviewViewModelStatus.REFRESH_FAILED -> updatePageStyle(false, false, true)
+            OverviewViewModelStatus.INIT_REFRESH -> {
+                // 初期表示（空白画面）
+                updatePageMode(true, false, false)
+            }
+            OverviewViewModelStatus.SWIPE_REFRESH -> {
+                // スワイプによる更新中表示（空白画面＋スワイププログレス）
+                /*
+                updatePageMode(false, false, false)
+                */
+                // プログレスのみ非表示（他は現状表示を継続）
+                binding.overviewProgress.visibility = View.GONE
+            }
+            OverviewViewModelStatus.REFRESH_CONTRIBUTORS -> {
+                // コントリビュータ一覧表示
+                updatePageMode(false, true, false)
+            }
+            OverviewViewModelStatus.REFRESH_FAILED -> {
+                // エラー表示（雲アイコンにスラッシュ）
+                updatePageMode(false, false, true)
+            }
         }
     }
 
-    private fun updatePageStyle(
+    private fun updatePageMode(
         isShowProgress: Boolean,
         isShowContents: Boolean,
         isShowError: Boolean
