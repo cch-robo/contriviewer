@@ -77,7 +77,7 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier,
     }
 
     /**
-     * 不特定先からの状態更新通知への対応。
+     * 不特定先からの状態更新通知への対応。（現状では、使われていない）
      */
     override fun updateState() {
         debugLog("OverviewViewModel  updateState, status=${status}")
