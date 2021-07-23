@@ -45,9 +45,6 @@ class DetailFragment : Fragment() {
             detailArguments.login
         )
         viewBinding.setup(viewModel)
-
-        // コントリビュータ詳細を更新する
-        viewModel.refreshContributor()
     }
 
     override fun onDestroy() {

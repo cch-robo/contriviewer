@@ -74,7 +74,7 @@ class OverviewViewBinding(
     }
 
     /**
-     * 不特定先からの状態更新通知(状態遷移先通知)への対応。
+     * 不特定先からの状態更新通知(状態遷移先通知)への対応。（ViewModelにも公開される）
      */
     override fun updateState() {
         debugLog("OverviewViewBinding  updateState, status=${viewModel.status}")

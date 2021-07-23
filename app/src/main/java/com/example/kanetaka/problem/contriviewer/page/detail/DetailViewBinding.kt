@@ -48,7 +48,7 @@ class DetailViewBinding(
     }
 
     /**
-     * 不特定先からの状態更新通知(状態遷移先通知)への対応。
+     * 不特定先からの状態更新通知(状態遷移先通知)への対応。（ViewModelにも公開される）
      */
     override fun updateState() {
         debugLog("DetailViewBinding  updateState, state=${viewModel.status}")
@@ -56,6 +56,9 @@ class DetailViewBinding(
             DetailViewModelStatus.INIT_REFRESH -> {
                 // コントリビュータ詳細初期表示
                 updatePage(viewModel)
+
+                // コントリビュータ詳細を更新する
+                viewModel.refreshContributor()
             }
             DetailViewModelStatus.REFRESH_CONTRIBUTOR -> {
                 // コントリビュータ詳細更新成功

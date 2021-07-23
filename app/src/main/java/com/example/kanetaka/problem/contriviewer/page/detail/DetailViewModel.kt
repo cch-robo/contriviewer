@@ -85,7 +85,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier,
     }
 
     /**
-     * コントリビュータ情報をリフレシュする。
+     * コントリビュータ情報をリフレシュする。（ViewBindingに公開する)
      */
     override fun refreshContributor() {
         debugLog("DetailViewModel  refreshContributor")
