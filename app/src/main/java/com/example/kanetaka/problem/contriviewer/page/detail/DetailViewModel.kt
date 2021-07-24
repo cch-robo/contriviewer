@@ -71,6 +71,7 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier,
 
         // コントリビュータ一覧画面ステータス・オブサーバー
         _status.observe(viewLifecycleOwner, Observer {
+            debugLog("DetailViewModel  observer update status=$it")
             status = it
             notify.updateState()
         })

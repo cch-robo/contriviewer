@@ -71,6 +71,7 @@ class OverviewViewModel : ViewModel(), OverviewViewModelNotifier,
 
         // コントリビュータ一覧画面ステータス・オブサーバー
         _status.observe(viewLifecycleOwner, Observer {
+            debugLog("OverviewViewMode  observer update status=$it")
             status = it
             notify.updateState()
         })
