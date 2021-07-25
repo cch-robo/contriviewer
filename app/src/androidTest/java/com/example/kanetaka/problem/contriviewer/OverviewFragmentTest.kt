@@ -14,7 +14,10 @@ import com.example.kanetaka.problem.contriviewer.util.SimpleFactory
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 import com.example.kanetaka.problem.contriviewer.util.VariableHolder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.*
+import org.junit.After
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -64,7 +67,8 @@ class OverviewViewFragmentTest {
         // 簡易依存性注入条件設定
         SimpleFactory.setCondition<ContriViewerRepository>(
             fakeSuccessRepository,
-            "com.example.kanetaka.problem.contriviewer.page.overview.OverviewFragment")
+            "com.example.kanetaka.problem.contriviewer.page.overview.OverviewFragment"
+        )
 
         // OverviewFragment の ViewBinding と ViewModel の可変ホルダー生成
         val viewBinding = VariableHolder<OverviewViewBinding>()
@@ -161,7 +165,8 @@ class OverviewViewFragmentTest {
         // 簡易依存性注入条件設定
         SimpleFactory.setCondition<ContriViewerRepository>(
             fakeFailedRepository,
-            "com.example.kanetaka.problem.contriviewer.page.overview.OverviewFragment")
+            "com.example.kanetaka.problem.contriviewer.page.overview.OverviewFragment"
+        )
 
         // OverviewFragment の ViewBinding と ViewModel の可変ホルダー生成
         val viewBinding = VariableHolder<OverviewViewBinding>()

@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.kanetaka.problem.contriviewer.BuildConfig
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
-import java.lang.NullPointerException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 
@@ -62,9 +61,10 @@ object Utilities {
     /**
      * Instrumented test 実行中判定
      */
-    fun isRunningOnTest() : Boolean {
+    fun isRunningOnTest(): Boolean {
         if (Thread.currentThread().name
-                .lastIndexOf("androidx.test.runner.AndroidJUnitRunner") >= 0) return true
+                .lastIndexOf("androidx.test.runner.AndroidJUnitRunner") >= 0
+        ) return true
         return false
     }
 }
@@ -100,7 +100,7 @@ object SimpleFactory {
      * - value: 生成オブジェクト（T型を継承⇒インターフェース実装していること）
      * - owner: 生成オブジェクトの所有先オブジェクト
      */
-    fun <T:Any> create(value: T, owner: Any) : T {
+    fun <T : Any> create(value: T, owner: Any): T {
         //debugLog("SimpleFactory  create - value super=${value.javaClass.kotlin.superclasses[0].simpleName}, value=${value.javaClass.kotlin.simpleName}, owner=${owner.javaClass.kotlin.simpleName}")
         //debugLog("SimpleFactory  create - inject super=${injectValueSuper?.simpleName}, inject=${injectValue?.javaClass?.kotlin?.simpleName}")
         return if (injectValue == null) {
@@ -124,7 +124,7 @@ object SimpleFactory {
      * - injectValue: 注入オブジェクト (直系継承元が、valueの直系継承元と同じであること)
      * − injectTargetOwnerName: 注入オブジェクト・所有先クラスパス
      */
-    fun <T:Any> setCondition(value: T, ownerName: String) {
+    fun <T : Any> setCondition(value: T, ownerName: String) {
         debugLog("SimpleFactory  setCondition - Thread.name=${Thread.currentThread().name}")
         if (Utilities.isRunningOnTest()) {
             // Kotlin オブジェクトからクラス情報を取得するには、value.javaClass : Class<T> を使わないで下さい。
@@ -186,7 +186,7 @@ class VariableHolder<T>(private var _value: T? = null) {
     /**
      * 変数値が not null かをチェックします。
      */
-    fun isNotNull():Boolean {
+    fun isNotNull(): Boolean {
         return _value != null
     }
 
@@ -194,7 +194,7 @@ class VariableHolder<T>(private var _value: T? = null) {
      * 変数値が null でなければ、
      * 引数指定の処置を行います。
      */
-    fun ifNotNull(operation : (v:T) -> Unit) {
+    fun ifNotNull(operation: (v: T) -> Unit) {
         if (isNotNull()) operation(_value!!)
     }
 
@@ -202,7 +202,7 @@ class VariableHolder<T>(private var _value: T? = null) {
      * 変数値が null であれば、
      * 引数指定の処置を行います。
      */
-    fun ifNull(operation : () -> Unit) {
+    fun ifNull(operation: () -> Unit) {
         if (!isNotNull()) operation()
     }
 

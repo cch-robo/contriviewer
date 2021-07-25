@@ -88,7 +88,7 @@ class OverviewViewBinding(
                 root.postDelayed({
                     startProgress(viewModel.status)
                     showNotice(R.string.contributors_overview_refresh_request)
-                },500)
+                }, 500)
             }
             OverviewViewModelStatus.SWIPE_REFRESH -> {
                 // コントリビュータ一覧更新開始（スワイププログレス）
@@ -192,7 +192,7 @@ class OverviewViewBinding(
      * コントリビュータ一覧画面表示モード更新
      */
     private fun updatePageMode(status: OverviewViewModelStatus) {
-        when(status) {
+        when (status) {
             OverviewViewModelStatus.INIT_REFRESH -> {
                 // 初期表示（空白画面）
                 updatePageMode(true, false, false)

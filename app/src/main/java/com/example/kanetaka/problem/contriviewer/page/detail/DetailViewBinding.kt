@@ -199,8 +199,8 @@ class DetailViewBinding(
     /**
      * コントリビュータ詳細画面表示モード更新
      */
-    private fun updatePageMode(status : DetailViewModelStatus) {
-        when(status) {
+    private fun updatePageMode(status: DetailViewModelStatus) {
+        when (status) {
             DetailViewModelStatus.INIT_REFRESH -> {
                 // 初期表示（空白画面）
                 updatePageMode(true, false, false)

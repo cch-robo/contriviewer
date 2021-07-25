@@ -36,7 +36,10 @@ class OverviewFragment : Fragment() {
         viewModel.setup(
             this.viewLifecycleOwner,
             viewBinding,
-            SimpleFactory.create<ContriViewerRepository>((this.activity?.application as ContriViewerApplication).repo, this)
+            SimpleFactory.create<ContriViewerRepository>(
+                (this.activity?.application as ContriViewerApplication).repo,
+                this
+            )
         )
         viewBinding.setup(this, viewModel)
     }
