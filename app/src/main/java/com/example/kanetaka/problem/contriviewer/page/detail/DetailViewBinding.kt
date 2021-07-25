@@ -7,21 +7,16 @@ import androidx.annotation.StringRes
 import com.bumptech.glide.Glide
 import com.example.kanetaka.problem.contriviewer.R
 import com.example.kanetaka.problem.contriviewer.databinding.FragmentDetailBinding
+import com.example.kanetaka.problem.contriviewer.page.DestinationUnspecifiedStateChangeNotifier
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
 /**
- * ViewBinding用の通知インターフェース。
- * ViewModel から View への通知インターフェースを提供します。
+ * ViewBinding用の通知インターフェース。（ViewModelには公開しない）
+ * View への通知インターフェースを提供します。
  */
 interface DetailViewBindingNotifier {
     // ページ更新開始通知
-    fun updatePage(contributor: DetailContributor?)
-
-    // リフレッシュ開始通知
-    fun refreshStart()
-
-    // リフレッシュ終了通知
-    fun refreshStopped()
+    fun updatePage(viewModel: DetailViewModel)
 
     // ユーザへのメッセージ依頼通知
     fun showNotice(@StringRes messageId: Int)
@@ -32,56 +27,94 @@ interface DetailViewBindingNotifier {
  */
 class DetailViewBinding(
     private val binding: FragmentDetailBinding
-) : DetailViewBindingNotifier {
+) : DetailViewBindingNotifier, DestinationUnspecifiedStateChangeNotifier {
 
     val root: View
         get() = binding.root
 
-    private lateinit var _notify: DetailViewModelNotifier
-    private val notify: DetailViewModelNotifier
+    private lateinit var _viewModel: DetailViewModel
+    private val viewModel: DetailViewModel
+        get() = _viewModel
+
+    private lateinit var _notify: DestinationUnspecifiedStateChangeNotifier
+    private val notify: DestinationUnspecifiedStateChangeNotifier
         get() = _notify
 
-    fun setup(ViewModelNotifier: DetailViewModelNotifier) {
+    fun setup(viewModel: DetailViewModel) {
         debugLog("DetailViewBinding  setup start")
-        _notify = ViewModelNotifier
-
+        _viewModel = viewModel
+        _notify = viewModel
         debugLog("DetailViewBinding  setup end")
     }
 
-    override fun refreshStart() {
-        debugLog("DetailViewBinding  refreshStart")
-        // プログレス回転を表示する
-        binding.detailProgress.visibility = View.VISIBLE
+    /**
+     * 不特定先からの状態更新通知(状態遷移先通知)への対応。（ViewModelにも公開される）
+     */
+    override fun updateState() {
+        debugLog("DetailViewBinding  updateState, state=${viewModel.status}")
+        when (viewModel.status) {
+            DetailViewModelStatus.INIT_REFRESH -> {
+                // コントリビュータ詳細初期表示
+                updatePage(viewModel)
 
-        // リフレッシュ中は、ページ更新まで詳細表示を隠します。
-        binding.contributorContents.visibility = View.GONE
+                // コントリビュータ詳細を更新する
+                viewModel.refreshContributor()
+            }
+            DetailViewModelStatus.REFRESH_CONTRIBUTOR -> {
+                // コントリビュータ詳細更新成功
+                updatePage(viewModel)
+            }
+            DetailViewModelStatus.REFRESH_FAILED -> {
+                // コントリビュータ詳細更新失敗
+                updatePage(viewModel)
+                showNotice(R.string.contributor_detail_refresh_error)
+            }
+        }
     }
 
-    override fun refreshStopped() {
-        // プログレス回転を消去する
-        binding.detailProgress.visibility = View.GONE
-        debugLog("DetailViewBinding  refreshStopped")
-    }
-
+    /**
+     * ユーザへメッセージを通知（ViewModelには公開しない）
+     */
     override fun showNotice(@StringRes messageId: Int) {
         // ユーザへメッセージを通知
         val message: String = binding.root.context.getString(messageId)
         Toast.makeText(binding.root.context, message, Toast.LENGTH_LONG).show()
     }
 
-    override fun updatePage(contributor: DetailContributor?) {
-        debugLog("DetailViewBinding  updatePage(${contributor?.login})")
-        if (contributor == null) {
-            binding.contributorContents.visibility = View.GONE
-            binding.detailProgress.visibility = View.GONE
-            binding.detailConnectionError.visibility = View.VISIBLE
-            return
+    /**
+     * コントリビュータ詳細更新通知（ViewModelには公開しない）
+     */
+    override fun updatePage(viewModel: DetailViewModel) {
+        debugLog("DetailViewBinding  updatePage(${viewModel.contributor?.login}), state=${viewModel.status}")
+        if (viewModel.contributor == null) {
+            when (viewModel.status) {
+                DetailViewModelStatus.INIT_REFRESH -> {
+                    updatePageMode(DetailViewModelStatus.INIT_REFRESH)
+                }
+                DetailViewModelStatus.REFRESH_FAILED -> {
+                    updatePageMode(DetailViewModelStatus.REFRESH_FAILED)
+                    debugLog("DetailViewBinding  refresh Error")
+                }
+                else -> {
+                    // REFRESH_CONTRIBUTOR かつコントリビュータ無し
+                    updatePageMode(DetailViewModelStatus.REFRESH_FAILED)
+                    debugLog("DetailViewBinding  refresh Unexpected")
+                }
+            }
+        } else {
+            if (viewModel.status == DetailViewModelStatus.REFRESH_CONTRIBUTOR) {
+                updatePageMode(DetailViewModelStatus.REFRESH_CONTRIBUTOR)
+
+                // contributor コンディションは、not null が保証されている。
+                updatePageContents(viewModel.contributor!!)
+            }
         }
+    }
 
-        binding.contributorContents.visibility = View.VISIBLE
-        binding.detailProgress.visibility = View.GONE
-        binding.detailConnectionError.visibility = View.GONE
-
+    /**
+     * コントリビュータ詳細画面表示コンテンツ更新
+     */
+    private fun updatePageContents(contributor: DetailContributor) {
         Glide.with(binding.root.context)
             .load(contributor.iconUrl)
             .placeholder(R.drawable.loading_animation)
@@ -161,5 +194,40 @@ class DetailViewBinding(
         val text = binding.root.context.getString(stringId) + "  $numeric"
         textView.text = text
         textView.visibility = View.VISIBLE
+    }
+
+    /**
+     * コントリビュータ詳細画面表示モード更新
+     */
+    private fun updatePageMode(status: DetailViewModelStatus) {
+        when (status) {
+            DetailViewModelStatus.INIT_REFRESH -> {
+                // 初期表示（空白画面）
+                updatePageMode(true, false, false)
+            }
+            DetailViewModelStatus.REFRESH_CONTRIBUTOR -> {
+                // コントリビュータ詳細表示
+                updatePageMode(false, true, false)
+            }
+            DetailViewModelStatus.REFRESH_FAILED -> {
+                // エラー表示（雲アイコンにスラッシュ）
+                updatePageMode(false, false, true)
+            }
+        }
+    }
+
+    private fun updatePageMode(
+        isShowProgress: Boolean,
+        isShowContents: Boolean,
+        isShowError: Boolean
+    ) {
+        binding.detailProgress.visibility = getVisibility(isShowProgress)
+        binding.contributorContents.visibility = getVisibility(isShowContents)
+        binding.detailConnectionError.visibility = getVisibility(isShowError)
+    }
+
+    private fun getVisibility(isShow: Boolean): Int {
+        if (isShow) return View.VISIBLE
+        return View.GONE
     }
 }
