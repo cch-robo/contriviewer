@@ -4,15 +4,15 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import com.example.kanetaka.problem.contriviewer.R
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.detail.DetailModel
 import com.example.kanetaka.problem.contriviewer.infra.githubapi.overview.OverviewModel
+import com.example.kanetaka.problem.contriviewer.page.DestinationUnspecifiedStateChangeNotifier
 import com.example.kanetaka.problem.contriviewer.page.detail.DetailContributor
-import com.example.kanetaka.problem.contriviewer.page.detail.DetailViewBindingNotifier
 import com.example.kanetaka.problem.contriviewer.page.detail.DetailViewModel
+import com.example.kanetaka.problem.contriviewer.page.detail.DetailViewModelStatus
+import com.example.kanetaka.problem.contriviewer.page.overview.OverviewViewModelStatus
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugTestLog
-import com.example.kanetaka.problem.contriviewer.viewmodel.FakeDetailViewBindingNotifier.Notify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -78,6 +78,9 @@ class DetailViewModelUnitTest {
         val fragment = FakeDetailFragment()
         fragment.setLifecycleState(Lifecycle.State.RESUMED)
 
+        // fakeViewBindingNotifier 初期設定
+        fakeViewBindingNotifier.setup(viewModel)
+
         // ViewModel 初期設定
         viewModel.setup(
             fragment.viewLifecycleOwner,
@@ -86,16 +89,14 @@ class DetailViewModelUnitTest {
             "dlam"
         )
 
-        // viewBindingNotify.refreshStart ⇒ コントリビュータ取得開始通知
-        // viewBindingNotify.refreshStopped ⇒ プログレス終了通知
-        // viewBindingNotify.updatePage ⇒ 取得したコントリビュータでの画面更新通知
-        viewModel.refreshContributor()
+        // ViewModel 状態更新
+        viewModel.updateState()
 
-        // コントリビュータ取得完了(updatePage完了)まで待機
+        // コントリビュータ詳細取得完了(updatePage完了)まで待機
         fakeViewBindingNotifier.await()
         debugTestLog("after  success - refreshContributor()")
 
-        // コントリビュータ情報確認
+        // コントリビュータ詳細情報確認
         val contributor: DetailContributor? = fakeViewBindingNotifier.contributor
         assertEquals("https://avatars.githubusercontent.com/u/831038?v=4", contributor?.iconUrl)
         assertEquals("dlam", contributor?.login)
@@ -103,12 +104,11 @@ class DetailViewModelUnitTest {
         assertEquals("https://github.com/dlam", contributor?.account)
         debugTestLog("contributor {login:${contributor?.login}, name:${contributor?.name}, account:${contributor?.account}}")
 
-        // 各種通知への呼出順確認
-        assertEquals(3, fakeViewBindingNotifier.notifies.size)
-        assertEquals(Notify.REFRESH_START, fakeViewBindingNotifier.notifies[0].first)
-        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
-        assertEquals(Notify.UPDATE_PAGE, fakeViewBindingNotifier.notifies[2].first)
-        fakeViewBindingNotifier.notifies
+        // コントリビュータ詳細状態確認
+        assertEquals(
+            DetailViewModelStatus.REFRESH_CONTRIBUTOR,
+            fakeViewBindingNotifier.viewModelStatus
+        )
     }
 
     /**
@@ -123,6 +123,9 @@ class DetailViewModelUnitTest {
         val fragment = FakeDetailFragment()
         fragment.setLifecycleState(Lifecycle.State.RESUMED)
 
+        // fakeViewBindingNotifier 初期設定
+        fakeViewBindingNotifier.setup(viewModel)
+
         // ViewModel 初期設定
         viewModel.setup(
             fragment.viewLifecycleOwner,
@@ -131,33 +134,20 @@ class DetailViewModelUnitTest {
             "dlam"
         )
 
-        // viewBindingNotify.refreshStart ⇒ コントリビュータ取得開始通知
-        // viewBindingNotify.refreshStopped ⇒ プログレス終了通知
-        // viewBindingNotify.updatePage ⇒ コントリビュータ未取得での画面更新通知
-        // viewBindingNotify.showNotice ⇒ コントリビュータ取得失敗表示通知
-        viewModel.refreshContributor()
+        // ViewModel 状態更新
+        viewModel.updateState()
 
-        // コントリビュータ取得完了(updatePage完了)まで待機
+        // コントリビュータ詳細取得完了(updatePage完了)まで待機
         fakeViewBindingNotifier.await()
         debugTestLog("after  failed - refreshContributor()")
 
-        // コントリビュータ情報確認
+        // コントリビュータ詳細情報確認
         val contributor: DetailContributor? = fakeViewBindingNotifier.contributor
         assertEquals(null, contributor)
         debugTestLog("contributor fetch failed")
 
-        // 各種通知への呼出順確認
-        assertEquals(4, fakeViewBindingNotifier.notifies.size)
-        assertEquals(Notify.REFRESH_START, fakeViewBindingNotifier.notifies[0].first)
-        assertEquals(Notify.REFRESH_STOPPED, fakeViewBindingNotifier.notifies[1].first)
-        assertEquals(Notify.UPDATE_PAGE, fakeViewBindingNotifier.notifies[2].first)
-        assertEquals(Notify.SHOW_NOTICE, fakeViewBindingNotifier.notifies[3].first)
-
-        // メッセージ確認
-        assertEquals(
-            R.string.contributor_detail_refresh_error,
-            fakeViewBindingNotifier.notifies[3].second
-        )
+        // コントリビュータ詳細状態確認
+        assertEquals(DetailViewModelStatus.REFRESH_FAILED, fakeViewBindingNotifier.viewModelStatus)
     }
 }
 
@@ -182,53 +172,52 @@ private class FakeDetailFragment : LifecycleOwner {
 /**
  * テスト用 DetailViewBindingNotifier.
  */
-private class FakeDetailViewBindingNotifier : DetailViewBindingNotifier {
+private class FakeDetailViewBindingNotifier : DestinationUnspecifiedStateChangeNotifier {
+    // コントリビュータ詳細画面 ViewModel
+    private lateinit var _viewModel: DetailViewModel
+    val viewModel: DetailViewModel
+        get() = _viewModel
+
     // コントリビュータ取得完了待機用ラッチ
     private val _latch: CountDownLatch = CountDownLatch(1)
     fun await() {
         _latch.await(10000, TimeUnit.MILLISECONDS)
     }
 
-    // 各種通知への呼出順
-    private var _notifies: MutableList<Pair<Notify, Int>> = mutableListOf()
-    val notifies: List<Pair<Notify, Int>>
-        get() = _notifies
+    // コントリビュータ詳細画面ステータス
+    private lateinit var _viewModelStatus: DetailViewModelStatus
+    val viewModelStatus: DetailViewModelStatus
+        get() = _viewModelStatus
 
     // コントリビュータ
     private var _contributor: DetailContributor? = null
     val contributor: DetailContributor?
         get() = _contributor
 
-    override fun updatePage(contributor: DetailContributor?) {
-        debugTestLog("Called updatePage()")
-        _notifies.add(Pair(Notify.UPDATE_PAGE, 0))
-        _contributor = contributor
-
-        // 成功時/エラー時の完了待機解除
-        _latch.countDown()
+    fun setup(viewModel: DetailViewModel) {
+        _viewModel = viewModel
     }
 
-    override fun refreshStart() {
-        debugTestLog("Called refreshStart()")
-        _notifies.add(Pair(Notify.REFRESH_START, 0))
-    }
+    override fun updateState() {
+        // ViewModel状態遷移先ステータス
+        _viewModelStatus = viewModel.status
+        _contributor = viewModel.contributor
+        debugTestLog("ViewBinding  updateState, status=${viewModelStatus}, contributors=${viewModel.contributor}")
 
-    override fun refreshStopped() {
-        debugTestLog("Called refreshStopped()")
-        _notifies.add(Pair(Notify.REFRESH_STOPPED, 0))
-    }
-
-    override fun showNotice(messageId: Int) {
-        debugTestLog("Called showNotice()")
-        _notifies.add(Pair(Notify.SHOW_NOTICE, messageId))
-    }
-
-    // 通知種別
-    enum class Notify {
-        UPDATE_PAGE,
-        REFRESH_START,
-        REFRESH_STOPPED,
-        SHOW_NOTICE
+        when (viewModelStatus) {
+            DetailViewModelStatus.INIT_REFRESH -> {
+                // コントリビュータ詳細更新要求を通知
+            }
+            DetailViewModelStatus.REFRESH_CONTRIBUTOR -> {
+                // コントリビュータ詳細更新成功
+                _latch.countDown()
+            }
+            DetailViewModelStatus.REFRESH_FAILED -> {
+                // コントリビュータ詳細更新失敗
+                _latch.countDown()
+            }
+            else -> OverviewViewModelStatus.INIT_REFRESH
+        }
     }
 }
 

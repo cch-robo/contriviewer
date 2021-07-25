@@ -2,9 +2,10 @@ package com.example.kanetaka.problem.contriviewer.page.detail
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.kanetaka.problem.contriviewer.R
+import com.example.kanetaka.problem.contriviewer.page.DestinationUnspecifiedStateChangeNotifier
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 import kotlinx.coroutines.Dispatchers
@@ -13,24 +14,35 @@ import kotlinx.coroutines.withContext
 
 
 /**
- * ViewModel用の通知インターフェース。
+ * ViewModel用の内部通知インターフェース。（外部公開しない）
  * ViewBinding から ViewModel への通知インターフェースを提供します。
  */
-interface DetailViewModelNotifier {
+private interface DetailViewModelNotifier {
     // コントリビュータ・リフレッシュ開始通知
     fun refreshContributor()
 }
 
 /**
+ * ViewModel用のステータス。
+ * ViewModel用のコントリビュータ詳細画面ステータス
+ */
+enum class DetailViewModelStatus {
+    INIT_REFRESH,
+    REFRESH_CONTRIBUTOR,
+    REFRESH_FAILED;
+}
+
+/**
  * ViewModel として View の状態値を管理する
  */
-class DetailViewModel : ViewModel(), DetailViewModelNotifier {
+class DetailViewModel : ViewModel(), DetailViewModelNotifier,
+    DestinationUnspecifiedStateChangeNotifier {
     private lateinit var _repo: ContriViewerRepository
     private val repo: ContriViewerRepository
         get() = _repo
 
-    private lateinit var _notify: DetailViewBindingNotifier
-    private val notify: DetailViewBindingNotifier
+    private lateinit var _notify: DestinationUnspecifiedStateChangeNotifier
+    private val notify: DestinationUnspecifiedStateChangeNotifier
         get() = _notify
 
     private lateinit var _login: String
@@ -38,11 +50,17 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
         get() = _login
 
     // コントリビューター
-    private var _contributorObserver = MutableLiveData<DetailContributor>()
+    private var _contributorObserver: DetailContributor? = null
+    val contributor: DetailContributor?
+        get() = _contributorObserver
+
+    // カレント・コントリビュータ一覧画面ステータス
+    private var _status = MutableLiveData(DetailViewModelStatus.INIT_REFRESH)
+    lateinit var status: DetailViewModelStatus
 
     fun setup(
         viewLifecycleOwner: LifecycleOwner,
-        viewBindingNotifier: DetailViewBindingNotifier,
+        viewBindingNotifier: DestinationUnspecifiedStateChangeNotifier,
         repo: ContriViewerRepository,
         login: String
     ) {
@@ -51,19 +69,27 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
 
         _login = login
 
-        // コントリビュータ一覧更新通知
-        _contributorObserver.observe(viewLifecycleOwner, {
-            _notify.updatePage(it)
+        // コントリビュータ一覧画面ステータス・オブサーバー
+        _status.observe(viewLifecycleOwner, Observer {
+            debugLog("DetailViewModel  observer update status=$it")
+            status = it
+            notify.updateState()
         })
     }
 
     /**
-     * コントリビュータ情報をリフレシュする。
+     * 不特定先からの状態更新通知への対応。（現状では、使われていない）
+     */
+    override fun updateState() {
+        debugLog("DetailViewModel  updateState, status=${status}")
+        refreshContributor()
+    }
+
+    /**
+     * コントリビュータ情報をリフレシュする。（ViewBindingに公開する)
      */
     override fun refreshContributor() {
-        // ViewBinding にリフレッシュが開始したことを通知
-        notify.refreshStart()
-
+        debugLog("DetailViewModel  refreshContributor")
         // IOスレッドでサーバからコントリビュータ情報を取得する
         viewModelScope.launch(Dispatchers.IO) {
             debugLog("refreshContributor  refresh start!!")
@@ -73,9 +99,6 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
 
             // 上記処理が完了してから、メインスレッドで実行されます。
             withContext(Dispatchers.Main) {
-                // ViewBinding にリフレッシュが終了したことを通知
-                notify.refreshStopped()
-
                 if (result.isSuccess && result.getOrNull() != null) {
                     val model = result.getOrNull()!!
                     debugLog("login=${model.login}, name=${model.name}")
@@ -98,12 +121,13 @@ class DetailViewModel : ViewModel(), DetailViewModelNotifier {
                     )
 
                     // コントリビュータ更新
-                    _contributorObserver.value = contributor
+                    _contributorObserver = contributor
+                    _status.value = DetailViewModelStatus.REFRESH_CONTRIBUTOR
 
                 } else {
                     // コントリビュータ更新
-                    _contributorObserver.value = null
-                    notify.showNotice(R.string.contributor_detail_refresh_error)
+                    _contributorObserver = null
+                    _status.value = DetailViewModelStatus.REFRESH_FAILED
                     debugLog("refreshContributor  failed")
                 }
                 debugLog("refreshContributor  refresh END!!")
