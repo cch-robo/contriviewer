@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.example.kanetaka.problem.contriviewer.application.ContriViewerApplication
 import com.example.kanetaka.problem.contriviewer.databinding.FragmentDetailBinding
+import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
+import com.example.kanetaka.problem.contriviewer.util.SimpleFactory
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
 class DetailFragment : Fragment() {
@@ -16,17 +18,18 @@ class DetailFragment : Fragment() {
     // Navigation Editor で自動生成された遷移パラメータ
     private val args: DetailFragmentArgs by navArgs()
 
-    private lateinit var viewModel: DetailViewModel
+    private lateinit var _viewModel: DetailViewModel
+    val viewModel get() = _viewModel
 
     // viewBinding は、_viewBinding 初期化後にしか参照されない。
     private var _viewBinding: DetailViewBinding? = null
-    private val viewBinding get() = _viewBinding!!
+    val viewBinding get() = _viewBinding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel = ViewModelProvider(this).get(DetailViewModel::class.java)
+        _viewModel = ViewModelProvider(this).get(DetailViewModel::class.java)
         _viewBinding =
             DetailViewBinding(FragmentDetailBinding.inflate(inflater, container, false))
         return viewBinding.root
@@ -41,7 +44,7 @@ class DetailFragment : Fragment() {
         viewModel.setup(
             this.viewLifecycleOwner,
             viewBinding,
-            (this.activity?.application as ContriViewerApplication).repo,
+            SimpleFactory.create<ContriViewerRepository>((this.activity?.application as ContriViewerApplication).repo, this),
             detailArguments.login
         )
         viewBinding.setup(viewModel)
