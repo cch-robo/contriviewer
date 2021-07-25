@@ -10,7 +10,7 @@ import com.example.kanetaka.problem.contriviewer.page.overview.OverviewViewBindi
 import com.example.kanetaka.problem.contriviewer.page.overview.OverviewViewModel
 import com.example.kanetaka.problem.contriviewer.page.overview.OverviewViewModelStatus
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
-import com.example.kanetaka.problem.contriviewer.util.SimpleFactory
+import com.example.kanetaka.problem.contriviewer.util.SimpleInjector
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 import com.example.kanetaka.problem.contriviewer.util.VariableHolder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,7 +65,7 @@ class OverviewViewFragmentTest {
         val latch = CountDownLatch(1)
 
         // 簡易依存性注入条件設定
-        SimpleFactory.setCondition<ContriViewerRepository>(
+        SimpleInjector.setCondition<ContriViewerRepository>(
             fakeSuccessRepository,
             "com.example.kanetaka.problem.contriviewer.page.overview.OverviewFragment"
         )
@@ -163,7 +163,7 @@ class OverviewViewFragmentTest {
         val latch = CountDownLatch(1)
 
         // 簡易依存性注入条件設定
-        SimpleFactory.setCondition<ContriViewerRepository>(
+        SimpleInjector.setCondition<ContriViewerRepository>(
             fakeFailedRepository,
             "com.example.kanetaka.problem.contriviewer.page.overview.OverviewFragment"
         )

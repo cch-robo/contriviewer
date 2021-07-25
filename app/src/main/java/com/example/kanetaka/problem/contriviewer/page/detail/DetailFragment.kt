@@ -10,7 +10,7 @@ import androidx.navigation.fragment.navArgs
 import com.example.kanetaka.problem.contriviewer.application.ContriViewerApplication
 import com.example.kanetaka.problem.contriviewer.databinding.FragmentDetailBinding
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
-import com.example.kanetaka.problem.contriviewer.util.SimpleFactory
+import com.example.kanetaka.problem.contriviewer.util.SimpleInjector
 import com.example.kanetaka.problem.contriviewer.util.Utilities.debugLog
 
 class DetailFragment : Fragment() {
@@ -44,7 +44,7 @@ class DetailFragment : Fragment() {
         viewModel.setup(
             this.viewLifecycleOwner,
             viewBinding,
-            SimpleFactory.create<ContriViewerRepository>(
+            SimpleInjector.inject<ContriViewerRepository>(
                 (this.activity?.application as ContriViewerApplication).repo,
                 this
             ),
