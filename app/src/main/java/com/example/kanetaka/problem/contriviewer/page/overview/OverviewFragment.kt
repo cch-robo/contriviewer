@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.kanetaka.problem.contriviewer.application.ContriViewerApplication
 import com.example.kanetaka.problem.contriviewer.databinding.FragmentOverviewBinding
 import com.example.kanetaka.problem.contriviewer.repository.ContriViewerRepository
-import com.example.kanetaka.problem.contriviewer.util.SimpleFactory
+import com.example.kanetaka.problem.contriviewer.util.SimpleInjector
 
 class OverviewFragment : Fragment() {
 
@@ -36,7 +36,7 @@ class OverviewFragment : Fragment() {
         viewModel.setup(
             this.viewLifecycleOwner,
             viewBinding,
-            SimpleFactory.create<ContriViewerRepository>(
+            SimpleInjector.inject<ContriViewerRepository>(
                 (this.activity?.application as ContriViewerApplication).repo,
                 this
             )

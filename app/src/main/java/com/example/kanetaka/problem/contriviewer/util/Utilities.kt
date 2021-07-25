@@ -77,7 +77,7 @@ object Utilities {
  * - 注入条件が満たされている場合：create()は、注入オブジェクトを返します。
  * - 注入条件が満たされていない場合：create()は、引数の value オブジェクトを返します。
  */
-object SimpleFactory {
+object SimpleInjector {
     // 注入オブジェクト
     private var injectValue: Any? = null
 
@@ -88,7 +88,7 @@ object SimpleFactory {
     private var injectTargetOwnerName: String? = null
 
     /**
-     * オブジェクト生成
+     * オブジェクト注入
      *
      * 生成オブジェクトの型と 所有先のクラスパスについて、
      *
@@ -100,7 +100,7 @@ object SimpleFactory {
      * - value: 生成オブジェクト（T型を継承⇒インターフェース実装していること）
      * - owner: 生成オブジェクトの所有先オブジェクト
      */
-    fun <T : Any> create(value: T, owner: Any): T {
+    fun <T : Any> inject(value: T, owner: Any): T {
         //debugLog("SimpleFactory  create - value super=${value.javaClass.kotlin.superclasses[0].simpleName}, value=${value.javaClass.kotlin.simpleName}, owner=${owner.javaClass.kotlin.simpleName}")
         //debugLog("SimpleFactory  create - inject super=${injectValueSuper?.simpleName}, inject=${injectValue?.javaClass?.kotlin?.simpleName}")
         return if (injectValue == null) {
@@ -111,7 +111,7 @@ object SimpleFactory {
             value
         } else {
             // injectValue と value は、同じ継承元を継承(同じインターフェースを実装)している。
-            debugLog("SimpleFactory  create - inject - ${injectValue?.javaClass?.kotlin?.simpleName}")
+            debugLog("SimpleFactory  inject - inject object ${injectValue?.javaClass?.kotlin?.simpleName}")
             injectValue as T
         }
     }
