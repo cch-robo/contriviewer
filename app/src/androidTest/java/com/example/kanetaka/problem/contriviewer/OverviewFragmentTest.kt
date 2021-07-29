@@ -86,6 +86,9 @@ class OverviewViewFragmentTest {
 
         // OverviewFragment オブジェクトを取得する。
         fragmentScenario.onFragment { fragment ->
+            // FragmentScenario#moveToState(Lifecycle.State.RESUMED)により、
+            // ブロック中 fragment の fragment#lifecycle は RESUMED に固定されています。
+
             // Fragment のテスト用オブジェクトから ViewBinding と ViewModel を取得
             viewBinding.nullableValue = fragment.viewBinding
             viewModel.nullableValue = fragment.viewModel
@@ -184,6 +187,9 @@ class OverviewViewFragmentTest {
 
         // OverviewFragment オブジェクトを取得する。
         fragmentScenario.onFragment { fragment ->
+            // FragmentScenario#moveToState(Lifecycle.State.RESUMED)により、
+            // ブロック中 fragment の fragment#lifecycle は RESUMED に固定されています。
+
             // Fragment のテスト用オブジェクトから ViewBinding と ViewModel を取得
             viewBinding.nullableValue = fragment.viewBinding
             viewModel.nullableValue = fragment.viewModel
