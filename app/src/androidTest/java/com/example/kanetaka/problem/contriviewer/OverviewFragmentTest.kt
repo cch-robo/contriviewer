@@ -43,7 +43,7 @@ class OverviewViewFragmentTest {
 
     @Test
     /**
-     * FIXME 【作成途中】 Espresso で表示状態を確認すること。
+     * TODO Espresso でも表示状態を確認すること。
      *
      * フェッチ成功発生時に、OverviewFragment が一覧表示状態に遷移しているかチェックします。
      *
@@ -86,6 +86,9 @@ class OverviewViewFragmentTest {
 
         // OverviewFragment オブジェクトを取得する。
         fragmentScenario.onFragment { fragment ->
+            // FragmentScenario#moveToState(Lifecycle.State.RESUMED)により、
+            // ブロック中 fragment の fragment#lifecycle は RESUMED に固定されています。
+
             // Fragment のテスト用オブジェクトから ViewBinding と ViewModel を取得
             viewBinding.nullableValue = fragment.viewBinding
             viewModel.nullableValue = fragment.viewModel
@@ -155,7 +158,7 @@ class OverviewViewFragmentTest {
 
     @Test
     /**
-     * FIXME 【作成途中】 Espresso で表示状態を確認すること。
+     * TODO  Espresso でも表示状態を確認すること。
      * フェッチ失敗発生時に、OverviewFragment がエラー状態に遷移しているかチェックします。
      */
     fun fragment_failed_view_transition_test() {
@@ -184,6 +187,9 @@ class OverviewViewFragmentTest {
 
         // OverviewFragment オブジェクトを取得する。
         fragmentScenario.onFragment { fragment ->
+            // FragmentScenario#moveToState(Lifecycle.State.RESUMED)により、
+            // ブロック中 fragment の fragment#lifecycle は RESUMED に固定されています。
+
             // Fragment のテスト用オブジェクトから ViewBinding と ViewModel を取得
             viewBinding.nullableValue = fragment.viewBinding
             viewModel.nullableValue = fragment.viewModel
