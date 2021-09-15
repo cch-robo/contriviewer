@@ -4,6 +4,7 @@ Android Architecture Components samplesリポジトリの contributors を確認
 ## misc ディレクトリについて
 
 - misc ディレクトリには、Contri Viewer 開発版のスナップショットと APK を配置しています。
+  - APK は、USBデバック可能な実機に`adb -d install app-debug.apk` コマンドでインストールできます。
 
 ## snapshot
 
