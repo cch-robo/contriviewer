@@ -43,7 +43,7 @@ class OverviewViewFragmentTest {
 
     @Test
     /**
-     * FIXME 【作成途中】 Espresso で表示状態を確認すること。
+     * TODO Espresso でも表示状態を確認すること。
      *
      * フェッチ成功発生時に、OverviewFragment が一覧表示状態に遷移しているかチェックします。
      *
@@ -158,7 +158,7 @@ class OverviewViewFragmentTest {
 
     @Test
     /**
-     * FIXME 【作成途中】 Espresso で表示状態を確認すること。
+     * TODO  Espresso でも表示状態を確認すること。
      * フェッチ失敗発生時に、OverviewFragment がエラー状態に遷移しているかチェックします。
      */
     fun fragment_failed_view_transition_test() {
