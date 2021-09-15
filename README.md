@@ -32,10 +32,17 @@ GitHub API アクセスは、リポジトリ内に閉じています。
   - リポジトリは、アプリケーションスコープで管理されます。  
   このため Activityが破棄されてもキャッシュは残るので、画面再表示に利用できます。
 
-- MVVMを模した、View(ViewBinding)、ViewModl、Model(ContriViewerRepository)構成になっています。  
+- (MVPに近い) MVVMを模した、View(ViewBinding)、ViewModl、Model(ContriViewerRepository)構成になっています。  
 各層間は、インターフェースを介した通知による相互協調を行っています。  
 ViewBindingは 表示関係に徹し、Repositoryは、コントリビュータ情報の取得と管理に徹し、  
 ViewModelは、ViewとModel(Repository)との仲介に徹します。
+
+- テストコードでは、Coroutine によるフェッチ成功と失敗時の挙動動作確認を行っています。
+  - Unit test だけでなく、Instrumented test によるエミュレータでの動作再現確認を行っています。
+
+- テストのためにオリジナルの簡易DIを使っています。(Hiltなどは使っていません)
+  - 簡易依存性注入クラス ⇒ SimpleInjector()  
+    テスト時のみ「依存元オブジェクトの実態」を指定のテスト用のインスタンスに差し替える簡易DIです。
 
 - その他
   - GitHub API コントリビュータ一覧情報処理は、ページネーションを追加して最大限取得するようにしています。
@@ -44,10 +51,8 @@ ViewModelは、ViewとModel(Repository)との仲介に徹します。
     キャッシュを併用しているためスワイプダウンが有効になるのは、5分後としています。
 
 アプリでやっていないこと  
-*課題の優先順位と時間制限により、以下は行っていません。*
+*MVVM + Repositoryパターン、Coroutine非同期処理の優先確認から、以下は行っていません。*
 
-- DI(Hiltなど)を使っていません。
 - マテリアルデザインの Themeや Widget使った UI表示を行っていません。
-- テストコードは、充分でありません。
 - コントリビュータ情報の永続化は行っていません。  
 このためアプリを終了させるとキャッシュもクリアされます。

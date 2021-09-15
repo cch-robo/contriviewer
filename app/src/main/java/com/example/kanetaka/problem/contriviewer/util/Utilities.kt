@@ -74,8 +74,8 @@ object Utilities {
  *
  * - Instrumented test 実行時でなければ、機能しません。
  * - Instrumented test 実行時であれば、注入条件を１つ設定できます。
- * - 注入条件が満たされている場合：create()は、注入オブジェクトを返します。
- * - 注入条件が満たされていない場合：create()は、引数の value オブジェクトを返します。
+ * - 注入条件が満たされている場合：inject()は、注入オブジェクトを返します。
+ * - 注入条件が満たされていない場合：inject()は、引数の value オブジェクトを返します。
  */
 object SimpleInjector {
     // 注入オブジェクト
